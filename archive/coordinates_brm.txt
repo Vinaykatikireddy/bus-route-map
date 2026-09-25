@@ -1,0 +1,32 @@
+[16.5244, 81.6817] <!-- lankala koderu center -->
+[16.4196, 81.6596] <!-- college gate -->
+[16.4259, 81.6584] <!-- college road - highway  -->
+[16.4241, 81.6519] <!-- seetharampuram petrol bunk -->
+[16.4106, 81.6455] <!-- ramannapalem - prupalem rd -->
+[16.4046, 81.5177] <!-- kalipatnam bvrm bypass -->
+[16.4423, 81.7013] <!-- nsp railway st entrance -->
+[16.4854, 81.7116] <!-- digamarru bypass -->
+[16.5099, 81.7195] <!-- pkl-bvrm bypass -->
+[16.5163, 81.7232] <!-- pkl lock -->
+[16.5190, 81.7036] <!-- poolapalli Y junction -->
+[16.5379, 81.6289] <!-- veeravasaram -->
+[16.5408, 81.6072] <!-- nandamuru garuvu -->
+[16.5195, 81.7011] <!-- poolapalli petrol bunk  -->
+[16.5472, 81.5389] <!-- bvrm overbridge east down -->
+[16.4575, 81.7711] <!-- chinchinada -->
+[16.4529, 81.7945] <!-- way to dindi resort -->
+[16.4569, 81.8050] <!-- sivakod lock -->
+[16.4169, 81.8105] <!-- gudimellanka bridge -->
+[16.4097, 81.8035] <!-- malikipuram baba temple -->
+[16.3948, 81.8049] <!-- mori high school road -->
+[16.3857, 81.8255] <!-- chintalamori center -->
+[16.3640, 81.8074] <!-- kesavadasupalem -->
+[16.4054, 81.7836] <!-- malikipuram venkateswar temple -->
+[16.4047, 81.7817] <!-- tkpalem center -->
+[16.5962, 81.7346] <!-- kavitam poduru bypass -->
+[16.5435, 81.6009] <!-- srungavruksham railway gate -->
+[16.5183, 81.7175] <!-- Palakollu railway gate -->
+[16.4393, 81.7014] <!-- nsp centre -->
+[16.4764, 81.7085] <!-- chinamamidipalli -->
+[16.5180, 81.7194] <!-- pko near railway  -->
+[16.5169, 81.7227] <!-- pko deshalamma -->

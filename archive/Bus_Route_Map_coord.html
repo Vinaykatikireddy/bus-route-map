@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Swarnandhra College of Engineering and Technology (SCET) offers UG B.Tech. programmes in Civil Engineering, Mechanical Engineering, Electrical and Electronics Engineering, Computer Science and Engineering, Electronics and Communication Engineering and Information Technology and PG M.Tech programmes in CAD/CAM, Power Electronics, VLSISD, Computer Science & Engineering, Nanotechnology, and Structural Engineering along with Master of Business Administration and Master of Computer Applications.">
+    <meta name="keywords" content="Swarnandhra College of Engineering and Technology, SCET, Narsapur, B.Tech, M.Tech, MBA, MCA, Civil Engineering, Mechanical Engineering, Electrical and Electronics Engineering, Computer Science and Engineering, Electronics and Communication Engineering, Information Technology, CAD/CAM, Power Electronics, VLSISD, Nanotechnology, Structural Engineering">
+    <meta name="author" content="The Vasista Educational Society">
+
+    <title>Swarnandhra College of Engineering and Technology | Bus Routes with Map</title> <link rel="icon" type="image/x-icon" href="https://www.swarnandhra.ac.in/favicon.ico">
+        
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.16.13/dist/css/uikit.min.css" />
+
+    <script src="https://www.swarnandhra.ac.in/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.16.13/dist/js/uikit-icons.min.js"></script>
+
+    <script src="https://www.swarnandhra.ac.in/js/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    
+    <link href="https://www.swarnandhra.ac.in/css/style.css" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+    <link href="https://www.swarnandhra.ac.in/css/main.css" rel="stylesheet">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <style>
+        /* Styles from official website*/
+        .fullscreen-modal { display: none; z-index: 9999; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); overflow: auto; }
+        .fullscreen-modal-content { display: flex; justify-content: center; align-items: center; height: 100%; }
+        .fullscreen-image { max-width: 100%; max-height: 100%; margin: auto; }
+        .close-button { position: absolute; top: 20px; right: 20px; color: #ffffff; font-size: 24px; cursor: pointer; }
+        .date-card { width: 60px; height: 60px; background-color: #ff6b6b; color: white; text-align: center; border-radius: 8px; padding: 5px; position: relative; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        .date-card .month { font-size: 12px; text-transform: uppercase; margin-bottom: 2px; }
+        .date-card .day { font-size: 22px; font-weight: bold; line-height: 1; }
+        .date-card .weekday { font-size: 9px; margin-top: 2px; text-transform: uppercase; }
+        .date-card .year { font-size: 9px; margin-top: 2px; }
+        .modal.fade .modal-dialog { transition: none !important; }
+        
+        /* Style for the map container */
+        #map { height: 600px; width: 100%; } 
+    </style>
+
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function(){
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    document.getElementById('large-main-nav').classList.add('fixed-top');
+                    navbar_height = document.querySelector('.navbar').offsetHeight;
+                    document.body.style.paddingTop = navbar_height + 'px';
+                } else {
+                    document.getElementById('large-main-nav').classList.remove('fixed-top');
+                    document.body.style.paddingTop = '0';
+                } 
+            });
+        }); 
+    </script>
+</head>
+
+<body>
+    <section class="center-links">
+        <ul class="centered-nav">
+        <li><a href="https://swarnandhra.directverify.in/">Student Certificate Verification</a></li>
+            <li><a href="https://www.swarnandhra.ac.in/nba.php">NBA Report</a></li>
+            <li><a href="https://www.swarnandhra.ac.in/iqac.php">IQAC</a></li>
+            <li><a href="https://www.swarnandhra.ac.in/nirfranking.php">NIRF</a></li>
+            <li><a href="https://www.swarnandhra.ac.in/naacssr.php">NAAC SSR</a></li>
+            <li><a href="https://swarnandhra.ac.in/feedback/">Feedback</a></li>
+            <li><a href="https://mail.google.com/a/swarnandhra.ac.in"><i class="fa-solid fa-earth-americas"></i> Web Mail</a></li>
+            <li><a href="https://www.facebook.com/profile.php?id=100088056803492" target="_blank"><i class="fa-brands fa-facebook-f"></i> Facebook</a></li>
+            <li><a href="https://www.swarnandhra.ac.in/alumniportal.php">Alumni</a></li>
+            <li><a href="https://www.swarnandhra.ac.in/grievance_portal/">Grievance</a></li>
+            <li><a href="https://www.swarnandhra.ac.in/idealab/">AICTE-IDEA Lab</a></li>
+            <li><a href="https://www.swarnandhra.ac.in/contactus.php">Contact</a></li>
+        </ul>
+    </section>
+
+    <section>
+        <div class="container md-top-nav-secion">
+            <div class="row align-items-center">
+                <div class="col-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a class="text-right" href="https://www.swarnandhra.ac.in/index.php">
+                            <img class="logo img-fluid" src="https://www.swarnandhra.ac.in/img/logo/swarnandhra-logo.png" alt="Swarnandhra logo">
+                        </a>
+                     
+                    </div>
+                </div>
+                <div class="col-4">
+            <div class="small-logos d-flex">
+                <img class="img-fluid" src="https://www.swarnandhra.ac.in/img/nba.png" alt="NBA logo">
+                <img class="img-fluid" src="https://www.swarnandhra.ac.in/img/naaca.png" alt="NAAC logo" >
+            </div>
+        </div>
+        <div class="col-md-4" style="display: flex; flex-direction: column; justify-content: space-around; align-items: center; text-align: center; padding: 2px; ">
+        <a href="https://www.swarnandhra.ac.in/webmanager" target="_blank" style="color:black;text-decoration: none; display: block; width: 100%;  ">News & Gallery</a>
+        <a href="https://www.swarnandhra.ac.in/swarnandhraexaminationportal/" style="color:black;text-decoration: none; display: block; width: 100%;  ">Examination Portal</a>
+        <a href="https://www.swarnandhraexambranch.com/" target="_blank" style="color:black;text-decoration: none; display: block; width: 100%;  ">Results</a>
+        </div>
+    
+            </div>
+        </div>
+    </section>
+    
+    <div class="container-fluid mbl-top-section">
+        <div class="container">
+            <div class="row row-cols-2">
+                <div class="col-7 top-strip-all top-strip-three" style="background-color: #213a7c;">
+                    <p class="top-strip-three-text text-white">Student Online Certificate Verification </p>
+                </div>
+                <div class="col-5 top-strip-icons" style="background-color: #213a7c;">
+                    <ul>
+                        <li><a href="https://www.facebook.com/profile.php?id=100088056803492" target="_blank"><i class="fa-brands fa-facebook-f text-white"></i></a></li>
+                        <li><a href="https://twitter.com/SWRN_Autonomous" target="_blank"><i class="fa-brands fa-twitter text-white"></i></a></li>
+                        <li><a href="https://www.swarnandhra.ac.in/www.linkedin.com/in/swarnandhra-college-engineering-autonomous-2a1969259"><i class="fa-brands fa-linkedin-in text-white"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid mbl-top-nav">
+        <div class="container">
+            <div class="inner-mbl-top-nav">
+                <a href="https://www.swarnandhra.ac.in/webmanager" target="_blank">News & Gallery </a>
+                <a href="https://www.swarnandhra.ac.in/nba.php">NBA Report</a>
+                <a href="https://www.swarnandhra.ac.in/swarnandhraexaminationportal/">Examination</a>
+                <a href="https://www.swarnandhraexambranch.com/">Results</a>
+                <a href="https://www.swarnandhra.ac.in/grievance_portal/">Grievance</a>
+                <a href="https://www.swarnandhra.ac.in/iqac.php">IQAC</a>
+                <a href="https://www.swarnandhra.ac.in/nirfranking.php">NIRF</a>
+                <a href="https://www.swarnandhra.ac.in/naacssr.php">NAAC SSR</a>
+                <a href="https://swarnandhra.ac.in/feedback/">feedback</a>
+                <a href="https://mail.google.com/a/swarnandhra.ac.in">Web Mail</a>
+                <a href="https://www.swarnandhra.ac.in/alumniportal.php">ALUMINI</a>
+               <a href="https://www.swarnandhra.ac.in/idealab/">AICTE-IDEA Lab</a>
+                <a href="https://www.swarnandhra.ac.in/contactus.php">CONTACT</a>
+            </div>
+        </div>
+    </div>
+    
+    <nav id="large-main-nav" class="navbar navbar-expand-lg navbar-dark large-main-nav">
+        <div class="container">
+        <a class="navbar-brand" href="https://www.swarnandhra.ac.in/index.php">
+            <img src="https://www.swarnandhra.ac.in/img/logo/swarnandhra-logo.png" alt="swarnandhra logo">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main_nav"
+            aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="main_nav">
+            <ul class="navbar-nav">
+                 <li class="nav-item active"> <a class="nav-link  text-white  " href="https://www.swarnandhra.ac.in/index.php">Home </a> </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link  text-white   text-white dropdown-toggle" href="#" data-bs-toggle="dropdown"> About </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="https://www.swarnandhra.ac.in/profile.php"> Profile </a></li>
+                        <li><a class="dropdown-item" href="https://www.swarnandhra.ac.in/visionmission.php"> Vision, Mission</a></li>
+                         </ul>
+                </li>
+                 <li class="nav-item dropdown">
+                    <a class="nav-link  text-white   dropdown-toggle" href="#" data-bs-toggle="dropdown"> Academics </a>
+                     <ul class="dropdown-menu">
+                         <li><a class="dropdown-item" href="https://www.swarnandhra.ac.in/academiccouncil.php"> Academic Council </a></li>
+                         </ul>
+                 </li>
+                 <li class="nav-item dropdown">
+                    <a class="nav-link  text-white   dropdown-toggle" href="#" data-bs-toggle="dropdown"> Admissions </a>
+                     <ul class="dropdown-menu">
+                         </ul>
+                 </li>
+                 <li class="nav-item dropdown">
+                    <a class="nav-link  text-white   dropdown-toggle" href="#" data-bs-toggle="dropdown"> Departments </a>
+                     <ul class="dropdown-menu">
+                         </ul>
+                 </li>
+                 <li class="nav-item dropdown">
+                    <a class="nav-link  text-white   dropdown-toggle" href="#" data-bs-toggle="dropdown"> Research & Development </a>
+                     <ul class="dropdown-menu">
+                         </ul>
+                 </li>
+                 <li class="nav-item dropdown">
+                    <a class="nav-link  text-white   dropdown-toggle" href="#" data-bs-toggle="dropdown"> Placements </a>
+                     <ul class="dropdown-menu">
+                         </ul>
+                 </li>
+                  <li class="nav-item dropdown">
+                    <a class="nav-link  text-white   dropdown-toggle" href="#" data-bs-toggle="dropdown"> Library </a>
+                     <ul class="dropdown-menu">
+                         </ul>
+                 </li>
+                 <li class="nav-item dropdown">
+                    <a class="nav-link  text-white   dropdown-toggle" href="#" data-bs-toggle="dropdown"> Staff </a>
+                     <ul class="dropdown-menu">
+                          </ul>
+                 </li>
+                 <li class="nav-item dropdown">
+                    <a class="nav-link  text-white   dropdown-toggle" href="#" data-bs-toggle="dropdown"> Facilities </a>
+                     <ul class="dropdown-menu">
+                          <li><a class="dropdown-item" href="https://www.swarnandhra.ac.in/atm.php"> ATM </a></li>
+                           <li><a class="dropdown-item" href="https://www.swarnandhra.ac.in/cafeteria.php"> Cafeteria </a></li>
+                           <li><a class="dropdown-item" href="https://www.swarnandhra.ac.in/wifi.php"> WIFI </a></li>
+                            <li><a class="dropdown-item" href="#"> Transport » </a>
+                                <ul class="submenu dropdown-menu">
+                                    <li><a class="dropdown-item" href="#">Bus Routes (Map View)</a></li> </ul>
+                            </li>
+                            </ul>
+                 </li>
+                 <li class="nav-item dropdown">
+                    <a class="nav-link  text-white    dropdown-toggle" href="#" data-bs-toggle="dropdown"> Student Support </a>
+                    <ul class="dropdown-menu dropdown-menu-right">
+                         </ul>
+                </li>
+            </ul>
+        </div> </div></nav>
+
+    <div class="color-line-section">
+        <div class="image-line-innerpage-common">
+        </div>
+    </div>
+
+    <section class="content" style="padding-top:10px;">
+      <div class="container-fluid">
+        <div class="row row-eq-height">
+          <div class="col-xl-9 col-md-12">
+            <div class="card" style="width: 100%;">
+              <div class="card-body">
+                 <div class="card-header bg-light display-5 text-dark">
+                   Bus Routes Map View
+                 </div>
+                 <div class="card-body">
+                   <div id="map"></div> 
+                 </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-lg-12">
+             <div>
+                <div align="Centre">
+                    <h4>Quick Links</h4>
+                </div>
+                <div id="MainMenu">
+                    <div class="list-group panel" id="sidebar">
+                         <a href="https://www.swarnandhra.ac.in/ipr.php" target="_self" class="list-group-item " data-parent="#MainMenu">IPR Details</a>
+                         <a href="https://mail.google.com/a/swarnandhra.ac.in" target="_blank" class="list-group-item " data-parent="#MainMenu">Web Mail</a>
+                         <a href="https://swarnandhra.directverify.in/" target="_blank" class="list-group-item " data-parent="#MainMenu">For Student Verification</a>
+                         <a href="https://swarnandhra.ac.in/campusattendance/" target="_blank" class="list-group-item " data-parent="#MainMenu">SCET Attendance Portal</a>
+                         <a href="https://swarnandhra.ac.in/swrnfirstyear/campusattendance/" target="_blank" class="list-group-item " data-parent="#MainMenu">First Year Attendance Portal</a>
+                    </div>
+                </div>
+             </div> 
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="color-line-section">
+        <div class="color-line-yellow"></div>
+        <div class="color-line-red"></div>
+    </div>
+    <footer class="footer-secion py-5">
+         <div class="container">
+             <div class="row">
+                  <div class="col-12 col-md-3">
+                        </div>
+                   <div class="col-12 col-md-8">
+                        </div>
+              </div>
+         </div>
+    </footer>
+    <div class="footer-copyright text-center">
+        <a href="https://api.whatsapp.com/send?phone=9346446880" class="whatsapp-button" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+        <p>Copyright © <a href="#">2025 Swarnandra</a>. All rights reserved. Developed By a Student.</p>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+
+<!--
+
+<script src="https://unpkg.com/leaflet"></script>
+<script src="https://unpkg.com/leaflet-omnivore"></script>
+<script>
+  var map = L.map('map').setView([16.4197, 81.6596], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+  omnivore.geojson('routes.geojson')  // Add your exported file here
+    .on('ready', function() {
+      this.setStyle({ color: 'blue', weight: 4 });
+      map.fitBounds(this.getBounds());
+    }).addTo(map);
+</script>
+
+
+
+-->
+    
+     <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        var collegeLat = 16.4197, collegeLng = 81.6596;
+        var map = L.map('map').setView([collegeLat, collegeLng], 11);
+
+        L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+          subdomains: ['mt0','mt1','mt2','mt3'],
+          attribution: 'Map data \u00a9 Google'
+        }).addTo(map);
+
+var busRoutes = [
+  { points: [[16.4197,81.6596],[16.4259,81.6584]], name: "Route 1", buses: "101, 102", color: "blue" },
+  { points: [[16.4259,81.6584],[16.4242,81.6524]], name: "Route 1", buses: "101, 102", color: "black" },
+  { points: [[16.4259,81.6584],[16.4320,81.6773]], name: "Route 1", buses: "101, 102", color: "blue" },
+  { points: [[16.4320,81.6773],[16.4305,81.6771]], name: "Route 1", buses: "101, 102", color: "black" },
+  { points: [[16.4320,81.6773],[16.4391,81.7006]], name: "Route 2", buses: "104, 105", color: "green" }, <!-- rusthumbada to nsp -->
+  { points: [[16.4391,81.7006],[16.4401,81.7005]], name: "Route 2", buses: "104, 105", color: "black" }, <!-- nsp to nsp railway station -->
+  { points: [[16.4391,81.7006],[16.4393, 81.7014],[16.4764, 81.7085],[16.4854,81.7116]], name: "Route 3", buses: "106, 107", color: "red" }, <!-- nsp to bypass -->
+  { points: [[16.4854,81.7116],[16.5098,81.7195]], name: "Route 4", buses: "109, 110", color: "blue" },
+  { points: [[16.5099, 81.7195],[16.5163, 81.7232]], name: "Route 6", buses: "114, v5", color: "white" },
+  { points: [[16.5163, 81.7232],[16.5169, 81.7227],[16.5180, 81.7198],[16.5190, 81.7036]], name: "Route 6", buses: "114, v5", color: "purple" }, <!-- pko lock to y junction -->
+  { points: [[16.4854,81.7116],[16.4819,81.7328]], name: "Route 4", buses: "109, 110", color: "black" }, <!-- nsp - pkl bypass to sasi clg -->
+  { points: [[16.4819,81.7328],[16.4575, 81.7711]], name: "Route 4", buses: "109, 110", color: "blue" }, <!-- sasi clg to chinchinada -->
+  { points: [[16.4575, 81.7711],[16.4529, 81.7945]], name: "Route 4", buses: "109, 110", color: "blue" }, <!-- chinchinada to dindi -->
+  { points: [[16.4529, 81.7945],[16.4569, 81.8050]], name: "Route 4", buses: "109, 110", color: "blue" }, <!-- dindi to sivakodu lock -->
+  { points: [[16.4569, 81.8050],[16.4169, 81.8105]], name: "Route 4", buses: "109, 110", color: "blue" }, <!-- sivakodu lock to gudimellanka bridge -->
+  { points: [[16.4169, 81.8105],[16.4097, 81.8035]], name: "Route 4", buses: "109, 110", color: "blue" }, <!-- gudimellanka bridge to malikipuram center -->
+  { points: [[16.4097, 81.8035],[16.3948, 81.8049]], name: "Route 4", buses: "109, 110", color: "blue" }, <!-- malikipuram center to mori centre -->
+  { points: [[16.4097, 81.8035],[16.4088, 81.7960]], name: "Route 4", buses: "109, 110", color: "blue" }, <!-- malikipuram center to venkateswar temple -->
+  { points: [[16.4088, 81.7960],[16.4047, 81.7817]], name: "Route 4", buses: "109, 110", color: "blue" }, <!-- malikipuram venkateswar temple to tekisettipalem cwnter -->
+  { points: [[16.3948, 81.8049],[16.3857, 81.8255]], name: "Route 4", buses: "109, 110", color: "blue" }, <!-- mori centre to chintalamori center -->
+  { points: [[16.3857, 81.8255],[16.3640, 81.8074]], name: "Route 4", buses: "109, 110", color: "blue" }, <!-- chintalamori center to kesavadasupalem -->
+  { points: [[16.5098,81.7195],[16.5190,81.7036]], name: "Route 5", buses: "111, 112", color: "brown" },
+<!--  { points: [[16.5184,81.7050],[16.5169,81.7044]], name: "Route 6", buses: "114, v5", color: "black" }, <!-- poolapalli Y junction -->
+  { points: [[16.5190, 81.7036],[16.5243, 81.6817]], name: "Route 6", buses: "114, 115", color: "cyan" },
+  { points: [[16.5243, 81.6817],[16.5379, 81.6289]], name: "Route 6", buses: "114, 115", color: "pink" },
+  { points: [[16.5379, 81.6289],[16.5414, 81.6063]], name: "Route 6", buses: "114, 115", color: "white" },
+  { points: [[16.5414, 81.6063],[16.5477, 81.5428]], name: "Route 6", buses: "114, 115", color: "yellow" },
+  { points: [[16.5477, 81.5428],[16.5472, 81.5389]], name: "Route 6", buses: "114, 115", color: "magenta" }
+];
+
+        busRoutes.forEach(function(route) {
+          var line = L.polyline(route.points, { color: route.color, weight: 4 }).addTo(map);
+          line.on('click', function(e) {
+            L.popup()
+              .setLatLng(e.latlng)
+              .setContent('<b>' + route.name + '</b><br>Available Buses: ' + route.buses)
+              .openOn(map);
+          });
+        });
+
+        var nightRestPlaces = [
+          [17.4050,78.5067],[17.3650,78.4667],[17.4200,78.5000],[17.3700,78.4950],[17.3900,78.4750] // Note: These points seem far from the college
+        ];
+
+        nightRestPlaces.forEach(function(loc) {
+          L.marker(loc).addTo(map).bindPopup("Night Resting Place");
+        });
+      });
+    </script>
+    
+    <script src="https://www.swarnandhra.ac.in/js/navbar.js"></script>
+    <script src="https://www.swarnandhra.ac.in/js/cards.js"></script>
+    <script src="https://www.swarnandhra.ac.in/js/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+    <script>
+        // Tab script from original file
+        $('.arrow-tabs a').click(function (e) {
+            e.preventDefault();
+            var selectedTab = $(this).parent();
+            var ul = selectedTab.parent();
+            ul.find("li").removeClass("ui-tabs-active ui-state-active ui-state-hover").attr("aria-selected",false);
+            selectedTab.addClass("ui-tabs-active ui-state-active").attr("aria-selected",true);
+            var content = ul.parent().find(".contents .ui-tabs-panel");
+            content.hide(); 
+            ul.parent().find($(this).attr("href")).fadeIn(200);  
+        });
+    </script>
+</body>
+</html>

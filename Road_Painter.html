@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Road Painter — Stable Build (Locked-to-one-road-type draw)</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html,body,#map { height:100%; margin:0; padding:0; }
+    .controls {
+      position:absolute; left:10px; top:10px; z-index:3000;
+      background:rgba(255,255,255,0.96); padding:10px; border-radius:10px;
+      box-shadow:0 6px 24px rgba(0,0,0,0.12); font-family:system-ui,Segoe UI,Roboto,Arial; font-size:13px; width:340px;
+      max-height:calc(100% - 20px); overflow-y:auto;
+    }
+    .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .btn { padding:6px 10px; border-radius:8px; cursor:pointer; border:1px solid #d0d6db; background:#f7f8fa; font:inherit; }
+    .btn:hover:not(:disabled) { background:#eef1f4; }
+    .btn.active { background:#2b8cff; color:white; border-color:#1a6ed8; }
+    .btn:disabled { opacity:0.5; cursor:not-allowed; }
+    label { display:block; margin:8px 0 4px; }
+    select, input[type="range"], input[type="color"] { width:100%; box-sizing:border-box; }
+    .hint { color:#666; font-size:12px; margin-top:6px; display:block; }
+    .leaflet-container.crosshair { cursor:crosshair !important; touch-action:none; }
+    #brushPreview { position:fixed; pointer-events:none; z-index:3500; border-radius:50%; transform:translate(-50%,-50%); display:none; box-shadow:0 0 0 1px rgba(255,255,255,0.7); }
+    .status { display:flex; justify-content:space-between; gap:8px; align-items:center; margin-top:6px; flex-wrap:wrap; }
+    .small { font-size:11px; color:#666; }
+    .legend { display:flex; flex-wrap:wrap; gap:4px 10px; margin-top:8px; padding-top:8px; border-top:1px solid #eceff1; font-size:11px; color:#555; }
+    .legend span { display:inline-flex; align-items:center; gap:4px; }
+    .legend i { width:12px; height:4px; border-radius:2px; display:inline-block; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <div class="controls" id="controls">
+    <div class="row" style="margin-bottom:6px;">
+      <button id="drawBtn" class="btn">✏️ Draw (D)</button>
+      <button id="eraserBtn" class="btn">🧽 Erase (E)</button>
+      <button id="undoBtn" class="btn">↶ Undo</button>
+      <button id="redoBtn" class="btn">↷ Redo</button>
+      <button id="clearBtn" class="btn">🧹 Clear</button>
+      <button id="exportBtn" class="btn">⬇️ Export</button>
+      <button id="importBtn" class="btn">⬆️ Import</button>
+      <input type="file" id="importFile" accept=".geojson,.json" style="display:none;" />
+    </div>
+
+    <label>Base layer</label>
+    <select id="baseSelect">
+      <option value="google">Google Hybrid (mt)</option>
+      <option value="osm">OpenStreetMap (light)</option>
+    </select>
+
+    <label>Brush radius (meters): <span id="sizeLabel">20</span></label>
+    <input id="brushSize" type="range" min="5" max="200" value="20" />
+
+    <label>Color</label>
+    <input id="brushColor" type="color" value="#ff0000" />
+
+    <div class="status">
+      <span class="hint" id="hint">Zoom ≥13 to load roads. Hold mouse to paint.</span>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <span class="small" id="loadedCount">Segments: 0</span>
+        <span class="small" id="activeType" title="Active locked road type"></span>
+      </div>
+    </div>
+
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div id="brushPreview"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/rbush@3.0.1/rbush.js"></script>
+
+  <script>
+  const map = L.map('map', { preferCanvas: true }).setView([16.4196, 81.6596], 13);
+  const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' });
+  const googleHybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { subdomains:['mt0','mt1','mt2','mt3'], attribution:'Map data © Google' });
+  googleHybrid.addTo(map);
+
+  const BASE_COLORS = {
+    motorway:'#e53935', trunk:'#8e24aa', primary:'#fb8c00',
+    secondary:'#1e88e5', tertiary:'#43a047', residential:'#78909c', service:'#a1887f'
+  };
+  const DEFAULT_BASE_COLOR = '#888888';
+  const baseColorFor = t => BASE_COLORS[t] || DEFAULT_BASE_COLOR;
+
+  const canvasRenderer = L.canvas({ padding:0 });
+  const roadsLayer = L.layerGroup().addTo(map);
+  const paintedLayer = L.layerGroup().addTo(map);
+
+  const tree = new RBush();
+  const idToLayer = new Map();
+  const paintedCache = new Map();
+  const paintedLayerMap = new Map();
+  const HISTORY_LIMIT = 200;
+  const history = [];
+  const redoStack = [];
+  const STORAGE_KEY = 'roadPainter.v1';
+
+  let drawMode = false, eraseMode = false;
+  let strokeActive = false;
+  let activePointerId = null;
+  let brushSize = 20, brushColor = '#ff0000';
+  let currentStroke = null;
+  let lastPaintTime = 0;
+  let lastPaintedLatlng = null;
+  let lastCursorLatlng = null;
+  let previewVisible = false;
+  const paintThrottleMs = 25;
+
+  let activeRoadType = null;
+
+  let currentFetchController = null;
+  const MAX_BBOX_DEG = 0.12;
+  const MAX_INDEXED_SEGMENTS = 4000;
+
+  const drawBtn = document.getElementById('drawBtn');
+  const eraserBtn = document.getElementById('eraserBtn');
+  const undoBtn = document.getElementById('undoBtn');
+  const redoBtn = document.getElementById('redoBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const exportBtn = document.getElementById('exportBtn');
+  const importBtn = document.getElementById('importBtn');
+  const importFile = document.getElementById('importFile');
+  const sizeLabel = document.getElementById('sizeLabel');
+  const brushPreview = document.getElementById('brushPreview');
+  const baseSelect = document.getElementById('baseSelect');
+  const hint = document.getElementById('hint');
+  const loadedCount = document.getElementById('loadedCount');
+  const activeTypeLabel = document.getElementById('activeType');
+  const legendEl = document.getElementById('legend');
+
+  legendEl.innerHTML = Object.entries(BASE_COLORS)
+    .map(([k,v]) => `<span><i style="background:${v}"></i>${k}</span>`).join('');
+
+  drawBtn.onclick = () => setMode('draw');
+  eraserBtn.onclick = () => setMode('erase');
+  undoBtn.onclick = undo;
+  redoBtn.onclick = redo;
+  clearBtn.onclick = clearPaintings;
+  exportBtn.onclick = downloadGeoJSON;
+  importBtn.onclick = () => importFile.click();
+  syncHistoryButtons();
+
+  importFile.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      importPaintedGeoJSON(JSON.parse(await file.text()));
+    } catch(err) {
+      alert('Invalid GeoJSON file.');
+      console.error(err);
+    }
+    importFile.value = '';
+  });
+
+  const brushSizeInput = document.getElementById('brushSize');
+  brushSizeInput.addEventListener('input', e => {
+    brushSize = +e.target.value;
+    sizeLabel.textContent = brushSize;
+    updateBrushPreview();
+  });
+  document.getElementById('brushColor').addEventListener('input', e => { brushColor = e.target.value; updateBrushPreview(); });
+
+  baseSelect.addEventListener('change', e=>{
+    if (e.target.value === 'osm') { map.removeLayer(googleHybrid); osmLayer.addTo(map); }
+    else { map.removeLayer(osmLayer); googleHybrid.addTo(map); }
+  });
+
+  const isTypingTarget = t => !!t && (t.isContentEditable || ['INPUT','SELECT','TEXTAREA'].includes(t.tagName));
+
+  window.addEventListener('keydown', e=>{
+    if (isTypingTarget(e.target)) return;
+    const key = e.key.toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && key === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
+    if ((e.ctrlKey || e.metaKey) && key === 'y') { e.preventDefault(); redo(); return; }
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (key === 'd') setMode('draw');
+    else if (key === 'e') setMode('erase');
+    else if (key === 'escape') setMode(null);
+  });
+
+  function setMode(mode){
+    drawMode = mode === 'draw';
+    eraseMode = mode === 'erase';
+    const active = drawMode || eraseMode;
+    drawBtn.classList.toggle('active', drawMode);
+    eraserBtn.classList.toggle('active', eraseMode);
+    map.getContainer().classList.toggle('crosshair', active);
+    map.doubleClickZoom[active ? 'disable' : 'enable']();
+    previewVisible = active && container.matches(':hover');
+    updateBrushPreview();
+    updateHint();
+  }
+
+  function updateHint(){
+    if (drawMode || eraseMode) {
+      if (map.getZoom() < 13) { hint.textContent = 'Zoom in (≥13) to paint/erase roads.'; hint.style.color = '#d9534f'; }
+      else { hint.textContent = 'Hold primary mouse (or touch) to paint/erase. Ctrl/Cmd+Z undo, +Shift redo.'; hint.style.color = '#666'; }
+    } else { hint.textContent = 'Zoom ≥13 to load roads. Painted roads are saved locally.'; hint.style.color = '#666'; }
+  }
+
+  function metersPerPixelAt(latlng){
+    const p = map.latLngToContainerPoint(latlng);
+    return map.distance(latlng, map.containerPointToLatLng(L.point(p.x + 1, p.y)));
+  }
+
+  function updateBrushPreview(){
+    const active = drawMode || eraseMode;
+    const show = active && previewVisible;
+    brushPreview.style.display = show ? 'block' : 'none';
+    if (!show) return;
+    const anchor = lastCursorLatlng || map.getCenter();
+    const px = Math.max(8, Math.round((2 * brushSize) / metersPerPixelAt(anchor)));
+    brushPreview.style.width = px + 'px';
+    brushPreview.style.height = px + 'px';
+    if (eraseMode) {
+      brushPreview.style.background = 'rgba(255,255,255,0.45)';
+      brushPreview.style.border = '2px solid #222';
+      brushPreview.style.opacity = 1;
+    } else {
+      brushPreview.style.background = brushColor;
+      brushPreview.style.opacity = 0.32;
+      brushPreview.style.border = `2px solid ${brushColor}`;
+    }
+  }
+
+  const container = map.getContainer();
+
+  const eventLatLng = e => {
+    const r = container.getBoundingClientRect();
+    return map.containerPointToLatLng(L.point(e.clientX - r.left, e.clientY - r.top));
+  };
+
+  const latlngArr = layer => layer.getLatLngs().map(p => [p.lat, p.lng]);
+
+  function pickClosestSegment(segs, latlng){
+    if (!segs || segs.length === 0) return null;
+    const mousePoint = map.latLngToContainerPoint(latlng);
+    const mPerPix = metersPerPixelAt(latlng);
+    let best = null, bestDist = Infinity;
+    for (const seg of segs) {
+      const pts = seg.getLatLngs();
+      const distMeters = L.LineUtil.pointToSegmentDistance(mousePoint, map.latLngToContainerPoint(pts[0]), map.latLngToContainerPoint(pts[1])) * mPerPix;
+      if (distMeters < bestDist) { bestDist = distMeters; best = seg; }
+    }
+    return best;
+  }
+
+  function detectRoadType(latlng){
+    const closest = pickClosestSegment(segmentsWithinBrushLatLng(latlng), latlng);
+    return closest?.feature?.properties?.highway || null;
+  }
+
+  function updateActiveTypeLabel(){
+    if (!activeTypeLabel) return;
+    if (!strokeActive) { activeTypeLabel.textContent = ''; return; }
+    const verb = drawMode ? 'Painting: ' : 'Erasing: ';
+    activeTypeLabel.textContent = verb + (activeRoadType || 'any');
+  }
+
+  container.addEventListener('pointerdown', e=>{
+    if (!e.isPrimary || strokeActive) return;
+    if (!(drawMode || eraseMode) || map.getZoom() < 13) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault();
+    try { container.setPointerCapture(e.pointerId); } catch(_){}
+    map.dragging.disable();
+    strokeActive = true;
+    activePointerId = e.pointerId;
+    currentStroke = { type: drawMode ? 'paint' : 'erase', changes: new Map() };
+    const latlng = eventLatLng(e);
+    activeRoadType = detectRoadType(latlng);
+    updateActiveTypeLabel();
+    lastPaintTime = Date.now();
+    paintAt(latlng);
+    lastPaintedLatlng = latlng;
+  });
+
+  function finishStroke(e){
+    if (!strokeActive) return;
+    if (e && e.pointerId != null && activePointerId != null && e.pointerId !== activePointerId) return;
+    if (e) {
+      if (map.getZoom() >= 13) {
+        const latlng = eventLatLng(e);
+        if (!lastPaintedLatlng || latlng.distanceTo(lastPaintedLatlng) > Math.max(2, brushSize * 0.25)) {
+          paintAt(latlng);
+          lastPaintedLatlng = latlng;
+        }
+      }
+      if (e.pointerId != null) { try { container.releasePointerCapture(e.pointerId); } catch(_){} }
+    }
+    const changes = currentStroke ? Array.from(currentStroke.changes.values()) : [];
+    if (changes.length) pushHistory({ type: currentStroke.type, changes });
+    strokeActive = false;
+    activePointerId = null;
+    currentStroke = null;
+    activeRoadType = null;
+    lastPaintedLatlng = null;
+    map.dragging.enable();
+    updateActiveTypeLabel();
+  }
+
+  container.addEventListener('pointerup', finishStroke);
+  container.addEventListener('pointercancel', finishStroke);
+  container.addEventListener('lostpointercapture', finishStroke);
+
+  container.addEventListener('pointerenter', e=>{
+    if (e.pointerType === 'mouse' && !strokeActive) { previewVisible = true; updateBrushPreview(); }
+  });
+  container.addEventListener('pointerleave', ()=>{
+    if (!strokeActive) { previewVisible = false; updateBrushPreview(); }
+  });
+
+  container.addEventListener('pointermove', e=>{
+    lastCursorLatlng = eventLatLng(e);
+    brushPreview.style.left = e.clientX + 'px';
+    brushPreview.style.top = e.clientY + 'px';
+    updateBrushPreview();
+    if (!strokeActive || map.getZoom() < 13) return;
+    if (e.pointerId !== activePointerId) return;
+    const now = Date.now();
+    if (now - lastPaintTime < paintThrottleMs) return;
+    lastPaintTime = now;
+    paintAt(lastCursorLatlng);
+  });
+  container.addEventListener('contextmenu', e => { if ((drawMode || eraseMode) && e.isTrusted) e.preventDefault(); });
+
+  const metersToLatDeg = m => m / 111320.0;
+  const metersToLonDeg = (m, lat) => m / (111320.0 * Math.cos(lat * Math.PI / 180));
+
+  function indexSegment(layer, id) {
+    const pts = layer.getLatLngs();
+    const lats = pts.map(p => p.lat), lngs = pts.map(p => p.lng);
+    tree.insert({ minX: Math.min(...lngs), minY: Math.min(...lats), maxX: Math.max(...lngs), maxY: Math.max(...lats), id, layer });
+    idToLayer.set(id, layer);
+  }
+  function clearIndex() { tree.clear(); idToLayer.clear(); }
+
+  function segmentsWithinBrushLatLng(latlng) {
+    const lat = latlng.lat;
+    const latDelta = metersToLatDeg(brushSize);
+    const lonDelta = metersToLonDeg(brushSize, lat);
+    const candidates = tree.search({ minX: latlng.lng - lonDelta, minY: lat - latDelta, maxX: latlng.lng + lonDelta, maxY: lat + latDelta });
+    const mousePoint = map.latLngToContainerPoint(latlng);
+    const mPerPix = metersPerPixelAt(latlng);
+    const hitToleranceMeters = Math.max(brushSize, 8);
+    const result = [];
+    for (const c of candidates) {
+      const pts = c.layer.getLatLngs();
+      const distMeters = L.LineUtil.pointToSegmentDistance(mousePoint, map.latLngToContainerPoint(pts[0]), map.latLngToContainerPoint(pts[1])) * mPerPix;
+      if (distMeters <= hitToleranceMeters) result.push(c.layer);
+    }
+    return result;
+  }
+
+  function createPersistentPaint(coordsLatLngs, color, weight, segmentId = null) {
+    const paintPoly = L.polyline(coordsLatLngs, {
+      color, weight, opacity: 0.95, renderer: canvasRenderer, interactive: false
+    });
+    paintPoly._rp_id = segmentId;
+    paintedLayer.addLayer(paintPoly);
+    if (segmentId) paintedLayerMap.set(segmentId, paintPoly);
+    return paintPoly;
+  }
+
+  function removePersistentPaintForId(id) {
+    const p = paintedLayerMap.get(id);
+    if (p) { paintedLayer.removeLayer(p); paintedLayerMap.delete(id); }
+  }
+
+  function toLatLngs(coords){
+    return (coords || []).map(c => Array.isArray(c) ? L.latLng(c[0], c[1]) : c);
+  }
+
+  function captureState(id){
+    const base = idToLayer.get(id);
+    const cached = paintedCache.get(id);
+    const highway = base?.feature?.properties?.highway ?? cached?.highway ?? null;
+    const coords = cached?.coords || (base ? latlngArr(base) : null);
+    if (cached && cached.painted) return { painted:true, color:cached.color, weight:cached.weight, coords, highway };
+    return { painted:false, color:null, weight:2, coords, highway };
+  }
+
+  function applyState(id, st){
+    const base = idToLayer.get(id);
+    const painted = !!(st && st.painted);
+    if (painted) {
+      const color = st.color || brushColor;
+      const weight = st.weight || 3;
+      const coords = st.coords || (base ? latlngArr(base) : null);
+      const highway = st.highway ?? base?.feature?.properties?.highway ?? null;
+      paintedCache.set(id, { painted:true, color, weight, coords, highway });
+      if (base) {
+        base.setStyle({ color, weight });
+        base.feature = base.feature || {};
+        base.feature.properties = { ...(base.feature.properties||{}), painted:true, color };
+      }
+      if (!paintedLayerMap.has(id) && coords) createPersistentPaint(toLatLngs(coords), color, weight, id);
+    } else {
+      paintedCache.delete(id);
+      if (base) {
+        const highway = base.feature?.properties?.highway || st?.highway || null;
+        base.setStyle({ color: baseColorFor(highway), weight: 2 });
+        base.feature = base.feature || {};
+        base.feature.properties = { ...(base.feature.properties||{}), painted:false };
+        delete base.feature.properties.color;
+      }
+      removePersistentPaintForId(id);
+    }
+  }
+
+  const syntheticKey = s => JSON.stringify([s.coords, s.color, s.weight || 3]);
+
+  function findSyntheticLayer(s){
+    const want = syntheticKey(s);
+    let found = null;
+    paintedLayer.eachLayer(l => {
+      if (found || l._rp_id) return;
+      if (syntheticKey({ coords: latlngArr(l), color: l.options.color, weight: l.options.weight }) === want) found = l;
+    });
+    return found;
+  }
+
+  function applySynthetic(s, op){
+    if (op === 'remove') {
+      const l = findSyntheticLayer(s);
+      if (l) paintedLayer.removeLayer(l);
+    } else {
+      if (!findSyntheticLayer(s)) createPersistentPaint(toLatLngs(s.coords), s.color, s.weight || 3, null);
+    }
+  }
+
+  function applyChange(ch, direction){
+    if (ch.id) {
+      applyState(ch.id, direction === 'undo' ? ch.prev : ch.next);
+    } else if (ch.synthetic) {
+      const op = ch.op === 'add' ? 'add' : 'remove';
+      applySynthetic(ch.synthetic, direction === 'undo' ? (op === 'add' ? 'remove' : 'add') : op);
+    }
+  }
+
+  function paintAt(latlng) {
+    const segs = segmentsWithinBrushLatLng(latlng);
+    for (const seg of segs) {
+      const roadType = seg.feature?.properties?.highway || null;
+      if (activeRoadType && roadType !== activeRoadType) continue;
+
+      const id = seg._rp_id;
+      const prev = captureState(id);
+      const stroke = currentStroke;
+      const firstTouch = !!stroke && !stroke.changes.has(id);
+
+      if (drawMode) {
+        const newWeight = Math.max(3, Math.round(brushSize / 8));
+        if (prev.painted && prev.color === brushColor && prev.weight === newWeight) continue;
+        const next = { painted:true, color:brushColor, weight:newWeight, coords:latlngArr(seg), highway:roadType };
+        seg.setStyle({ color:brushColor, weight:newWeight });
+        seg.feature = seg.feature || {};
+        seg.feature.properties = { ...(seg.feature.properties||{}), painted:true, color:brushColor };
+        paintedCache.set(id, next);
+        if (!paintedLayerMap.has(id)) createPersistentPaint(seg.getLatLngs(), brushColor, newWeight, id);
+        if (firstTouch) stroke.changes.set(id, { id, prev, next });
+      } else if (eraseMode) {
+        if (!prev.painted) continue;
+        const next = { painted:false, color:null, weight:2, coords:prev.coords, highway:roadType };
+        applyState(id, next);
+        if (firstTouch) stroke.changes.set(id, { id, prev, next });
+      }
+    }
+  }
+
+  let fetchTimeout = null;
+  function debounceFetch(){ if (fetchTimeout) clearTimeout(fetchTimeout); fetchTimeout = setTimeout(fetchRoads, 350); }
+
+  async function fetchRoads() {
+    if (map.getZoom() < 13) { roadsLayer.clearLayers(); clearIndex(); loadedCount.textContent = 'Segments: 0'; updateHint(); return; }
+    const b = map.getBounds();
+    const latSpan = Math.abs(b.getNorth() - b.getSouth());
+    const lonSpan = Math.abs(b.getEast() - b.getWest());
+    if (latSpan > MAX_BBOX_DEG || lonSpan > MAX_BBOX_DEG) {
+      hint.textContent = 'BBox too large — zoom in to load roads (prevents crashes).';
+      hint.style.color = '#d9534f';
+      return;
+    }
+    if (currentFetchController) try { currentFetchController.abort(); } catch(e){}
+    currentFetchController = new AbortController();
+    const signal = currentFetchController.signal;
+    const q = `[out:json][timeout:25];
+      (way["highway"~"^(motorway|trunk|primary|secondary|tertiary|residential|service)$"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}););
+      out geom;`;
+
+    try {
+      const res = await fetch('https://overpass-api.de/api/interpreter', { method:'POST', body:q, signal, headers:{'Content-Type':'text/plain'} });
+      if (!res.ok) throw new Error('Overpass returned ' + res.status);
+      const data = await res.json();
+      roadsLayer.clearLayers(); clearIndex();
+      let indexed = 0;
+      OUTER: for (const w of data.elements.filter(x => x.type==='way' && x.geometry?.length>=2)){
+        for (let j=0;j<w.geometry.length-1;j++){
+          if (indexed>=MAX_INDEXED_SEGMENTS) break OUTER;
+          const p1=w.geometry[j], p2=w.geometry[j+1];
+          if(p1.lat===p2.lat && p1.lon===p2.lon) continue;
+          const sid=`${w.id}-${j}`;
+          const highway = w.tags?.highway || null;
+          const seg = L.polyline([[p1.lat,p1.lon],[p2.lat,p2.lon]],{ color:baseColorFor(highway), weight:2, interactive:false, renderer:canvasRenderer });
+          seg._rp_id = sid;
+          seg.feature = { properties:{ osm_id:w.id, painted:false, highway } };
+
+          const cached = paintedCache.get(sid);
+          if (cached && cached.painted) {
+            seg.setStyle({ color:cached.color, weight:cached.weight });
+            seg.feature.properties.painted = true;
+            seg.feature.properties.color = cached.color;
+            if (!paintedLayerMap.has(sid)) createPersistentPaint(seg.getLatLngs(), cached.color, cached.weight, sid);
+          }
+          roadsLayer.addLayer(seg); indexSegment(seg,sid); indexed++;
+        }
+      }
+      loadedCount.textContent=`Segments: ${indexed}${indexed>=MAX_INDEXED_SEGMENTS?' (trimmed)':''}`;
+      hint.style.color='#666'; updateHint();
+    } catch(err) {
+      if(err.name!=='AbortError') { console.error(err); hint.textContent='Roads fetch failed — try again or zoom in.'; hint.style.color='#d9534f'; }
+    } finally { currentFetchController=null; }
+  }
+
+  map.on('moveend', ()=>{ debounceFetch(); updateBrushPreview(); });
+  map.on('zoomend', ()=>{ updateHint(); updateBrushPreview(); });
+
+  function syncHistoryButtons(){
+    undoBtn.disabled = history.length === 0;
+    redoBtn.disabled = redoStack.length === 0;
+  }
+
+  function pushHistory(action){
+    if(!action||!action.changes||action.changes.length===0) return;
+    history.push(action);
+    if(history.length>HISTORY_LIMIT) history.shift();
+    redoStack.length = 0;
+    syncHistoryButtons();
+    saveLocal();
+  }
+
+  function undo(){
+    if(!history.length){ syncHistoryButtons(); return; }
+    const action = history.pop();
+    for(let i=action.changes.length-1;i>=0;i--) applyChange(action.changes[i], 'undo');
+    redoStack.push(action);
+    syncHistoryButtons();
+    saveLocal();
+  }
+
+  function redo(){
+    if(!redoStack.length){ syncHistoryButtons(); return; }
+    const action = redoStack.pop();
+    for(const ch of action.changes) applyChange(ch, 'redo');
+    history.push(action);
+    if(history.length>HISTORY_LIMIT) history.shift();
+    syncHistoryButtons();
+    saveLocal();
+  }
+
+  function clearPaintings(){
+    const ids = Array.from(paintedCache.keys());
+    const changes = ids.map(id => {
+      const prev = captureState(id);
+      return { id, prev, next: { painted:false, color:null, weight:2, highway: prev.highway, coords: prev.coords } };
+    });
+    paintedLayer.eachLayer(l => {
+      if (l._rp_id) return;
+      changes.push({ synthetic: { coords: latlngArr(l), color: l.options.color, weight: l.options.weight }, op:'remove' });
+    });
+    ids.forEach(id => applyState(id, { painted:false }));
+    paintedLayer.clearLayers();
+    paintedLayerMap.clear();
+    paintedCache.clear();
+    if (changes.length) pushHistory({ type:'clear', changes });
+    else saveLocal();
+  }
+
+  function exportPaintedGeoJSON(){
+    const features=[];
+    paintedLayer.eachLayer(layer => {
+      const props = { color: layer.options.color, weight: layer.options.weight };
+      if (layer._rp_id) props.id = layer._rp_id;
+      features.push({
+        type:'Feature',
+        geometry:{ type:'LineString', coordinates: layer.getLatLngs().map(p => [p.lng, p.lat]) },
+        properties: props
+      });
+    });
+    return { type:'FeatureCollection', features };
+  }
+
+  function downloadGeoJSON(){
+    const data=exportPaintedGeoJSON();
+    const blob=new Blob([JSON.stringify(data,null,2)],{ type:'application/json' });
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download='painted-roads.geojson'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  }
+
+  function importPaintedGeoJSON(geojson) {
+    if (!geojson || !Array.isArray(geojson.features)) { alert('Not a GeoJSON FeatureCollection.'); return; }
+    const changes = [];
+    for (const f of geojson.features) {
+      if (f.geometry?.type !== 'LineString' || !f.geometry.coordinates?.length) continue;
+      const latlngs = toLatLngs(f.geometry.coordinates.map(c => [c[1], c[0]]));
+      const color = f.properties?.color || brushColor;
+      const weight = f.properties?.weight || Math.max(3, Math.round(brushSize / 8));
+      const id = f.properties?.id;
+      if (id) {
+        const prev = captureState(id);
+        const next = { painted:true, color, weight, coords: latlngs.map(p => [p.lat, p.lng]), highway: prev.highway };
+        applyState(id, next);
+        changes.push({ id, prev, next });
+      } else {
+        const synthetic = { coords: latlngs.map(p => [p.lat, p.lng]), color, weight };
+        applySynthetic(synthetic, 'add');
+        changes.push({ synthetic, op:'add' });
+      }
+    }
+    if (changes.length) pushHistory({ type:'import', changes });
+    else alert('No LineString features found in file.');
+  }
+
+  function saveLocal(){
+    try {
+      const painted = Array.from(paintedCache.entries());
+      const synthetic = [];
+      paintedLayer.eachLayer(l => {
+        if (l._rp_id) return;
+        synthetic.push({ coords: latlngArr(l), color: l.options.color, weight: l.options.weight });
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ painted, synthetic }));
+    } catch(e) { console.warn('Local save failed', e); }
+  }
+
+  function loadLocal(){
+    let raw;
+    try { raw = localStorage.getItem(STORAGE_KEY); } catch(e) { return; }
+    if (!raw) return;
+    try {
+      const data = JSON.parse(raw);
+      for (const [id, p] of (data.painted || [])) {
+        if (p && p.painted) paintedCache.set(id, { painted:true, color:p.color, weight:p.weight, coords:p.coords||null, highway:p.highway||null });
+      }
+      for (const s of (data.synthetic || [])) {
+        if (s?.coords?.length) createPersistentPaint(toLatLngs(s.coords), s.color || '#ff0000', s.weight || 3, null);
+      }
+    } catch(e) { console.warn('Local load failed', e); }
+  }
+
+  loadLocal();
+  fetchRoads();
+  updateHint();
+  updateBrushPreview();
+  </script>
+</body>
+</html>

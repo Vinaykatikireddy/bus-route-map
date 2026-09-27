@@ -1774,6 +1774,16 @@ document.addEventListener("DOMContentLoaded", function() {
       attribution: 'Map data \u00a9 Google'
     }).addTo(map);
 
+    function showMapNotice(message) {
+        var notice = document.createElement('div');
+        notice.setAttribute('role', 'alert');
+        notice.textContent = message;
+        notice.style.cssText = 'position:absolute;top:10px;left:50%;transform:translateX(-50%);' +
+            'z-index:1000;background:#fff;color:#b00020;padding:8px 14px;border-radius:6px;' +
+            'box-shadow:0 2px 6px rgba(0,0,0,.35);font:14px/1.4 sans-serif;max-width:90%;text-align:center;';
+        document.getElementById('map').appendChild(notice);
+    }
+
     // Load your GeoJSON file
     omnivore.geojson('routes.geojson')
       .on('ready', function() {
@@ -1789,7 +1799,15 @@ document.addEventListener("DOMContentLoaded", function() {
           });
 
           // Zoom map to fit all routes
-          map.fitBounds(this.getBounds());
+          var bounds = this.getBounds();
+          if (bounds.isValid()) {
+              map.fitBounds(bounds, { padding: [20, 20] });
+          } else {
+              showMapNotice('No bus routes were found in routes.geojson.');
+          }
+      })
+      .on('error', function() {
+          showMapNotice('Bus routes could not be loaded. Please refresh the page to try again.');
       })
        .addTo(map);
 

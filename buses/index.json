@@ -1,0 +1,17 @@
+{
+  "radius": 100,
+  "buses": [
+    {
+      "id": "1",
+      "file": "1_route.geojson"
+    },
+    {
+      "id": "2",
+      "file": "2_route.geojson"
+    },
+    {
+      "id": "3",
+      "file": "3_route.geojson"
+    }
+  ]
+}

@@ -794,6 +794,79 @@
     }
 }
 </style>
+
+    <!-- stop cards: white card next to the road with available buses -->
+    <style>
+        .bus-card-anchor {
+            background: none;
+            border: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .bus-card {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            min-width: 100px;
+            max-width: 190px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #e4e7ec;
+            border-radius: 10px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.16);
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.25;
+            pointer-events: none;
+        }
+
+        .bus-card::before {
+            content: '';
+            position: absolute;
+            left: -5px;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            background: #ffffff;
+            border-left: 1px solid #e4e7ec;
+            border-bottom: 1px solid #e4e7ec;
+            transform: translateY(-50%) rotate(45deg);
+        }
+
+        .bus-card-place {
+            font-size: 12px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .bus-card-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .bus-card-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .bus-chip {
+            display: inline-block;
+            padding: 2px 7px;
+            background: #213a7c;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 999px;
+        }
+    </style>
 </head>
 
 <body>
@@ -1790,12 +1863,6 @@ document.addEventListener("DOMContentLoaded", function() {
           this.eachLayer(function(layer) {
               // Optional: style each line based on properties in GeoJSON
               layer.setStyle({ color: layer.feature.properties.color || 'blue', weight: 4 });
-
-              // Optional: popup with route info
-              layer.bindPopup(
-                  '<b>' + (layer.feature.properties.name || 'Route') + '</b><br>' +
-                  'Available Buses: ' + (layer.feature.properties.buses || 'N/A')
-              );
           });
 
           // Zoom map to fit all routes
@@ -1810,6 +1877,119 @@ document.addEventListener("DOMContentLoaded", function() {
           showMapNotice('Bus routes could not be loaded. Please refresh the page to try again.');
       })
        .addTo(map);
+
+    // ---- Stop cards: white card next to the road with the buses available there ----
+    var CARD_MIN_ZOOM = 14;
+    var M_PER_DEG_LAT = 110540;
+    var M_PER_DEG_LNG = 111320 * Math.cos(16.5 * Math.PI / 180);
+    var cardsLayer = L.layerGroup();
+
+    function escapeHtml(text) {
+        return String(text).replace(/[&<>"']/g, function(ch) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+        });
+    }
+
+    function fetchJson(url) {
+        return fetch(url).then(function(res) {
+            if (!res.ok) { throw new Error(url + ' (' + res.status + ')'); }
+            return res.json();
+        });
+    }
+
+    function toSegments(featureCollection) {
+        var segments = [];
+        (featureCollection.features || []).forEach(function(feature) {
+            var geometry = feature.geometry;
+            if (!geometry || geometry.type !== 'LineString') { return; }
+            var coords = geometry.coordinates;
+            for (var i = 0; i < coords.length - 1; i++) {
+                segments.push([
+                    coords[i][0] * M_PER_DEG_LNG, coords[i][1] * M_PER_DEG_LAT,
+                    coords[i + 1][0] * M_PER_DEG_LNG, coords[i + 1][1] * M_PER_DEG_LAT
+                ]);
+            }
+        });
+        return segments;
+    }
+
+    function distanceToSegment(px, py, seg) {
+        var dx = seg[2] - seg[0], dy = seg[3] - seg[1];
+        var lengthSq = dx * dx + dy * dy;
+        var t = lengthSq ? ((px - seg[0]) * dx + (py - seg[1]) * dy) / lengthSq : 0;
+        if (t < 0) { t = 0; } else if (t > 1) { t = 1; }
+        var cx = seg[0] + t * dx, cy = seg[1] + t * dy;
+        return Math.sqrt((px - cx) * (px - cx) + (py - cy) * (py - cy));
+    }
+
+    function addStopCard(stop, buses) {
+        var chips = buses.map(function(busId) {
+            return '<span class="bus-chip">' + escapeHtml(busId) + '</span>';
+        }).join('');
+
+        L.marker([stop.lat, stop.lng], {
+            icon: L.divIcon({
+                className: 'bus-card-anchor',
+                html: '<div class="bus-card">' +
+                      '<span class="bus-card-place">' + escapeHtml(stop.name) + '</span>' +
+                      '<span class="bus-card-label">Available buses:</span>' +
+                      '<span class="bus-card-chips">' + chips + '</span>' +
+                      '</div>',
+                iconSize: [0, 0],
+                iconAnchor: [0, 0]
+            }),
+            interactive: false,
+            keyboard: false,
+            zIndexOffset: 600
+        }).addTo(cardsLayer);
+    }
+
+    function updateStopCards() {
+        var showCards = map.getZoom() >= CARD_MIN_ZOOM;
+        if (showCards && !map.hasLayer(cardsLayer)) {
+            map.addLayer(cardsLayer);
+        } else if (!showCards && map.hasLayer(cardsLayer)) {
+            map.removeLayer(cardsLayer);
+        }
+    }
+
+    function loadStopCards() {
+        Promise.all([fetchJson('waypoints.json'), fetchJson('buses/index.json')])
+            .then(function(results) {
+                var stops = results[0];
+                var manifest = results[1];
+                var radius = manifest.radius || 100;
+
+                return Promise.all((manifest.buses || []).map(function(bus) {
+                    return fetchJson('buses/' + bus.file).then(function(featureCollection) {
+                        return { id: bus.id, radius: radius, segments: toSegments(featureCollection) };
+                    });
+                })).then(function(busRoutes) {
+                    stops.forEach(function(stop) {
+                        var px = stop.lng * M_PER_DEG_LNG;
+                        var py = stop.lat * M_PER_DEG_LAT;
+                        var buses = busRoutes.filter(function(route) {
+                            return route.segments.some(function(segment) {
+                                return distanceToSegment(px, py, segment) <= route.radius;
+                            });
+                        }).map(function(route) {
+                            return route.id;
+                        });
+
+                        if (buses.length) { addStopCard(stop, buses); }
+                    });
+
+                    updateStopCards();
+                });
+            })
+            .catch(function(error) {
+                console.error('Stop cards could not be loaded:', error);
+                showMapNotice('Stop cards could not be loaded (' + error.message + ').');
+            });
+    }
+
+    map.on('zoomend', updateStopCards);
+    loadStopCards();
 });
 </script>
 

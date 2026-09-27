@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waypoint Editor | Bus Route Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        #panel {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 1000;
+            width: 320px;
+            max-height: calc(100% - 24px);
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            border: 1px solid #e4e7ec;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+            overflow: hidden;
+        }
+
+        #panel h1 {
+            margin: 0;
+            padding: 12px 14px;
+            background: #213a7c;
+            color: #ffffff;
+            font-size: 15px;
+            letter-spacing: 0.02em;
+        }
+
+        .panel-hint {
+            padding: 8px 14px;
+            font-size: 12px;
+            color: #475569;
+            background: #f8fafc;
+            border-bottom: 1px solid #eef2f6;
+        }
+
+        .panel-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 10px 14px;
+            border-bottom: 1px solid #eef2f6;
+        }
+
+        .btn {
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #0f172a;
+            background: #eef2f7;
+            border: 1px solid #dde3ec;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-primary {
+            background: #213a7c;
+            border-color: #213a7c;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #1a2e63;
+        }
+
+        #status {
+            padding: 6px 14px;
+            font-size: 11px;
+            color: #64748b;
+            min-height: 15px;
+        }
+
+        #list {
+            margin: 0;
+            padding: 6px;
+            list-style: none;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        #list li {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px;
+            border-radius: 8px;
+        }
+
+        #list li:hover {
+            background: #f1f5f9;
+        }
+
+        .wp-index {
+            flex: 0 0 auto;
+            width: 22px;
+            height: 22px;
+            line-height: 22px;
+            text-align: center;
+            background: #213a7c;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 50%;
+        }
+
+        .wp-name {
+            flex: 1;
+            min-width: 0;
+            padding: 5px 7px;
+            font-size: 12px;
+            color: #0f172a;
+            background: #ffffff;
+            border: 1px solid #dde3ec;
+            border-radius: 6px;
+        }
+
+        .wp-coords {
+            flex: 0 0 auto;
+            font-size: 10px;
+            color: #94a3b8;
+            white-space: nowrap;
+        }
+
+        .wp-delete {
+            flex: 0 0 auto;
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            font-size: 13px;
+            color: #b00020;
+            background: #ffffff;
+            border: 1px solid #f0d5d9;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .wp-delete:hover {
+            background: #fff1f2;
+        }
+
+        .name-editor {
+            position: fixed;
+            z-index: 1100;
+            display: flex;
+            gap: 6px;
+            padding: 8px;
+            background: #ffffff;
+            border: 1px solid #e4e7ec;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.22);
+        }
+
+        .name-editor.hidden {
+            display: none;
+        }
+
+        .name-editor input {
+            width: 200px;
+            padding: 6px 8px;
+            font-size: 13px;
+            border: 1px solid #dde3ec;
+            border-radius: 6px;
+        }
+
+        .wp-marker {
+            background: none;
+            border: 0;
+        }
+
+        .wp-pin {
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            background: #213a7c;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 700;
+            border: 2px solid #ffffff;
+            border-radius: 50% 50% 50% 0;
+            box-shadow: 0 3px 8px rgba(15, 23, 42, 0.35);
+            transform: rotate(-45deg);
+        }
+
+        .wp-pin span {
+            display: block;
+            transform: rotate(45deg);
+        }
+
+        .wp-label {
+            padding: 3px 8px;
+            background: #ffffff;
+            border: 1px solid #e4e7ec;
+            border-radius: 999px;
+            box-shadow: 0 3px 10px rgba(15, 23, 42, 0.18);
+            color: #0f172a;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .wp-label::before {
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            #panel {
+                width: calc(100% - 24px);
+                max-height: 45%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <aside id="panel">
+        <h1>Waypoint Editor</h1>
+        <div class="panel-hint">Click the map to drop a point, type its name, press Enter. Drag pins to adjust, right-click a pin to delete.</div>
+        <div class="panel-actions">
+            <button class="btn btn-primary" id="btnDownload" type="button">Download waypoints.json</button>
+            <button class="btn" id="btnCopy" type="button">Copy JSON</button>
+            <button class="btn" id="btnImport" type="button">Import file</button>
+            <button class="btn" id="btnClear" type="button">Clear all</button>
+            <input type="file" id="fileInput" accept="application/json,.json" hidden>
+        </div>
+        <div id="status">Loading waypoints.json...</div>
+        <ul id="list"></ul>
+    </aside>
+
+    <div class="name-editor hidden" id="nameEditor">
+        <input type="text" id="nameInput" placeholder="Stop name" maxlength="60">
+        <button class="btn btn-primary" id="nameSave" type="button">Save</button>
+        <button class="btn" id="nameCancel" type="button">Cancel</button>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        var points = [];
+        var editing = null;
+        var isNew = false;
+
+        var map = L.map('map').setView([16.4197, 81.6596], 11);
+        L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: 'Map data \u00a9 Google'
+        }).addTo(map);
+
+        var layer = L.layerGroup().addTo(map);
+        var listEl = document.getElementById('list');
+        var statusEl = document.getElementById('status');
+        var editorEl = document.getElementById('nameEditor');
+        var inputEl = document.getElementById('nameInput');
+
+        function escapeHtml(text) {
+            return String(text).replace(/[&<>"']/g, function(ch) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+            });
+        }
+
+        function round(value) {
+            return Math.round(value * 1e6) / 1e6;
+        }
+
+        function setStatus(message) {
+            statusEl.textContent = message;
+        }
+
+        function pointAt(lat, lng, name) {
+            var point = { name: name || 'New stop', lat: round(lat), lng: round(lng) };
+            point.marker = L.marker([point.lat, point.lng], {
+                draggable: true,
+                icon: L.divIcon({
+                    className: 'wp-marker',
+                    html: '<div class="wp-pin"><span>' + (points.length + 1) + '</span></div>',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 24]
+                })
+            }).addTo(layer);
+
+            point.marker.bindTooltip(point.name, {
+                permanent: true,
+                direction: 'right',
+                offset: [14, -12],
+                className: 'wp-label'
+            });
+
+            point.marker.on('click', function() {
+                openEditor(point, map.latLngToContainerPoint([point.lat, point.lng]));
+            });
+
+            point.marker.on('contextmenu', function() {
+                removePoint(point);
+            });
+
+            point.marker.on('dragend', function() {
+                var latlng = point.marker.getLatLng();
+                point.lat = round(latlng.lat);
+                point.lng = round(latlng.lng);
+                renderList();
+            });
+
+            points.push(point);
+            renderList();
+            return point;
+        }
+
+        function renumber() {
+            points.forEach(function(point, index) {
+                point.marker.setIcon(L.divIcon({
+                    className: 'wp-marker',
+                    html: '<div class="wp-pin"><span>' + (index + 1) + '</span></div>',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 24]
+                }));
+                point.marker.setTooltipContent(point.name);
+                var tooltip = point.marker.getTooltip();
+                var label = tooltip && tooltip.getElement();
+                if (label) { label.dataset.index = index; }
+            });
+        }
+
+        function labelAt(clientX, clientY) {
+            var labels = map.getContainer().querySelectorAll('.wp-label');
+            for (var i = 0; i < labels.length; i++) {
+                var rect = labels[i].getBoundingClientRect();
+                if (clientX >= rect.left - 4 && clientX <= rect.right + 4 &&
+                    clientY >= rect.top - 4 && clientY <= rect.bottom + 4) {
+                    return labels[i];
+                }
+            }
+            return null;
+        }
+
+        function renderList() {
+            listEl.innerHTML = points.map(function(point, index) {
+                return '<li data-index="' + index + '">' +
+                    '<span class="wp-index">' + (index + 1) + '</span>' +
+                    '<input class="wp-name" type="text" value="' + escapeHtml(point.name) + '" maxlength="60">' +
+                    '<span class="wp-coords">' + point.lat.toFixed(4) + ', ' + point.lng.toFixed(4) + '</span>' +
+                    '<button class="wp-delete" type="button" title="Delete">&times;</button>' +
+                    '</li>';
+            }).join('');
+            renumber();
+            setStatus(points.length + ' point(s) - save the file as waypoints.json in the project root.');
+        }
+
+        function openEditor(point, containerPoint) {
+            editing = point;
+            isNew = false;
+            inputEl.value = point.name;
+            positionEditor(containerPoint);
+            inputEl.focus();
+            inputEl.select();
+        }
+
+        function positionEditor(containerPoint) {
+            var rect = map.getContainer().getBoundingClientRect();
+            editorEl.classList.remove('hidden');
+            var left = rect.left + containerPoint.x + 16;
+            var top = rect.top + containerPoint.y - 46;
+            var maxLeft = window.innerWidth - editorEl.offsetWidth - 8;
+            editorEl.style.left = Math.max(8, Math.min(left, maxLeft)) + 'px';
+            editorEl.style.top = Math.max(8, top) + 'px';
+        }
+
+        function closeEditor(save) {
+            if (!editing) { return; }
+            if (save) {
+                var value = inputEl.value.trim();
+                if (value) {
+                    editing.name = value;
+                } else if (isNew) {
+                    removePoint(editing, true);
+                    editing = null;
+                    editorEl.classList.add('hidden');
+                    return;
+                }
+                renderList();
+            } else if (isNew) {
+                removePoint(editing, true);
+            }
+            editing = null;
+            editorEl.classList.add('hidden');
+        }
+
+        function removePoint(point, silent) {
+            var index = points.indexOf(point);
+            if (index === -1) { return; }
+            if (!silent && !window.confirm('Delete "' + point.name + '"?')) { return; }
+            layer.removeLayer(point.marker);
+            points.splice(index, 1);
+            renderList();
+        }
+
+        function toWaypoints() {
+            return points.map(function(point) {
+                return { name: point.name, lat: point.lat, lng: point.lng };
+            });
+        }
+
+        function loadWaypoints(data) {
+            if (!Array.isArray(data)) { throw new Error('expected a JSON array'); }
+            points.slice().forEach(function(point) { removePoint(point, true); });
+            data.forEach(function(item) {
+                if (item && typeof item.lat === 'number' && typeof item.lng === 'number') {
+                    pointAt(item.lat, item.lng, item.name || 'Stop ' + (points.length + 1));
+                }
+            });
+            renderList();
+        }
+
+        map.on('click', function(event) {
+            var original = event.originalEvent;
+            if (original.target.closest && original.target.closest('.leaflet-marker-icon')) { return; }
+
+            var label = labelAt(original.clientX, original.clientY);
+            if (label) {
+                var target = points[Number(label.dataset.index)];
+                if (target) {
+                    openEditor(target, map.latLngToContainerPoint([target.lat, target.lng]));
+                }
+                return;
+            }
+
+            if (editing) { closeEditor(false); }
+            var point = pointAt(event.latlng.lat, event.latlng.lng, 'New stop');
+            editing = point;
+            isNew = true;
+            inputEl.value = '';
+            positionEditor(map.latLngToContainerPoint(event.latlng));
+            inputEl.focus();
+        });
+
+        listEl.addEventListener('click', function(event) {
+            var row = event.target.closest('li');
+            if (!row) { return; }
+            var point = points[Number(row.dataset.index)];
+            if (!point) { return; }
+            if (event.target.classList.contains('wp-delete')) {
+                removePoint(point);
+                return;
+            }
+            if (event.target.classList.contains('wp-name')) { return; }
+            map.panTo([point.lat, point.lng]);
+            openEditor(point, map.latLngToContainerPoint([point.lat, point.lng]));
+        });
+
+        listEl.addEventListener('input', function(event) {
+            if (!event.target.classList.contains('wp-name')) { return; }
+            var row = event.target.closest('li');
+            var point = points[Number(row.dataset.index)];
+            if (!point) { return; }
+            point.name = event.target.value;
+            point.marker.setTooltipContent(point.name || 'Stop');
+        });
+
+        inputEl.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') { closeEditor(true); }
+            if (event.key === 'Escape') { closeEditor(false); }
+        });
+        inputEl.addEventListener('blur', function() {
+            window.setTimeout(function() { closeEditor(true); }, 120);
+        });
+        document.getElementById('nameSave').addEventListener('click', function() { closeEditor(true); });
+        document.getElementById('nameCancel').addEventListener('click', function() { closeEditor(false); });
+
+        document.getElementById('btnDownload').addEventListener('click', function() {
+            var blob = new Blob([JSON.stringify(toWaypoints(), null, 2) + '\n'], { type: 'application/json' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'waypoints.json';
+            link.click();
+            URL.revokeObjectURL(link.href);
+            setStatus('Downloaded waypoints.json (' + points.length + ' point(s)).');
+        });
+
+        document.getElementById('btnCopy').addEventListener('click', function() {
+            var text = JSON.stringify(toWaypoints(), null, 2) + '\n';
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(function() {
+                    setStatus('Copied ' + points.length + ' point(s) to the clipboard.');
+                }, function() {
+                    setStatus('Copy failed - use Download instead.');
+                });
+            } else {
+                setStatus('Clipboard unavailable - use Download instead.');
+            }
+        });
+
+        document.getElementById('btnImport').addEventListener('click', function() {
+            document.getElementById('fileInput').click();
+        });
+
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            var file = event.target.files[0];
+            if (!file) { return; }
+            var reader = new FileReader();
+            reader.onload = function() {
+                try {
+                    loadWaypoints(JSON.parse(reader.result));
+                    setStatus('Imported ' + points.length + ' point(s) from ' + file.name + '.');
+                } catch (error) {
+                    setStatus('Import failed: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        });
+
+        document.getElementById('btnClear').addEventListener('click', function() {
+            if (!points.length) { return; }
+            if (!window.confirm('Delete all ' + points.length + ' points?')) { return; }
+            points.slice().forEach(function(point) { removePoint(point, true); });
+            renderList();
+        });
+
+        fetch('waypoints.json')
+            .then(function(response) {
+                if (!response.ok) { throw new Error('HTTP ' + response.status); }
+                return response.json();
+            })
+            .then(function(data) {
+                loadWaypoints(data);
+                setStatus('Loaded ' + points.length + ' point(s) from waypoints.json.');
+            })
+            .catch(function(error) {
+                setStatus('waypoints.json not loaded (' + error.message + ') - start fresh or use Import file.');
+                renderList();
+            });
+    </script>
+</body>
+</html>

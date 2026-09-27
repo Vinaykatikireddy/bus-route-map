@@ -851,6 +851,20 @@
             letter-spacing: 0.03em;
         }
 
+        .bus-count {
+            display: inline-block;
+            min-width: 18px;
+            margin-left: 3px;
+            padding: 1px 6px;
+            background: #0f172a;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 700;
+            text-align: center;
+            border-radius: 999px;
+            letter-spacing: 0;
+        }
+
         .bus-card-chips {
             display: flex;
             flex-wrap: wrap;
@@ -1879,7 +1893,7 @@ document.addEventListener("DOMContentLoaded", function() {
        .addTo(map);
 
     // ---- Stop cards: white card next to the road with the buses available there ----
-    var CARD_MIN_ZOOM = 14;
+    var CARD_MIN_ZOOM = 16;
     var M_PER_DEG_LAT = 110540;
     var M_PER_DEG_LNG = 111320 * Math.cos(16.5 * Math.PI / 180);
     var cardsLayer = L.layerGroup();
@@ -1932,7 +1946,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 className: 'bus-card-anchor',
                 html: '<div class="bus-card">' +
                       '<span class="bus-card-place">' + escapeHtml(stop.name) + '</span>' +
-                      '<span class="bus-card-label">Available buses:</span>' +
+                      '<span class="bus-card-label">Available buses ' +
+                      '<span class="bus-count">' + buses.length + '</span></span>' +
                       '<span class="bus-card-chips">' + chips + '</span>' +
                       '</div>',
                 iconSize: [0, 0],

@@ -1810,13 +1810,6 @@ document.addEventListener("DOMContentLoaded", function() {
           showMapNotice('Bus routes could not be loaded. Please refresh the page to try again.');
       })
        .addTo(map);
-
-var nightRestPlaces = [ [17.4050,78.5067],[17.3650,78.4667],[17.4200,78.5000],[17.3700,78.4950],[17.3900,78.4750]
-    ];
-
-    nightRestPlaces.forEach(function(loc) {
-      L.marker(loc).addTo(map).bindPopup("Night Resting Place");
-    });
 });
 </script>
 

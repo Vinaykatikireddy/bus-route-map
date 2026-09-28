@@ -283,6 +283,7 @@ text-decoration: none;
 }
 /***** large devices main navigation ***/
 .large-main-nav{
+    /* background-color: #dc3545; */
     background-color: #213A7C;
 }
 .navbar-brand{
@@ -550,7 +551,7 @@ li.ui-state-default.ui-corner-top {
     filter: invert(1);
 }
 /*** img gallery section starts ****/
-.img-gallery{
+/* .img-gallery{
     background: #213A7C 0% 0% no-repeat padding-box;;
 }
 .img-gallery-heading h3{
@@ -597,9 +598,153 @@ img-one-one:hover {
 .img-six{
     background-image: linear-gradient(rgba(60, 89, 165,0.5), rgba(60, 89, 165,0.5)),url(../img/campus-facilities/hostel.png);
     background-size: cover;
+} */
+
+
+/*** img gallery section starts ****/
+/*** img gallery section starts ****/
+.img-gallery {
+    background: #213A7C;
+    padding: 50px 0;
 }
+
+.img-gallery-heading {
+    text-align: center;
+}
+
+.img-gallery-heading h3 {
+    font: normal normal medium 34px/51px 'Poppins', sans-serif;
+    letter-spacing: 0.82px;
+    color: #FFFFFF;
+    margin-bottom: 15px;
+}
+
+.img-gallery-heading .subtitle {
+    color: #E0E7FF;
+    font-size: 18px;
+    font-family: 'Poppins', sans-serif;
+    margin-bottom: 30px;
+}
+
+/* Facility Cards */
+.img-col {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    height: 320px;
+    display: flex;
+    align-items: flex-end;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+}
+
+.img-col:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Background Images with Gradient Overlays */
+.img-one-one {
+    background-image: linear-gradient(rgba(60, 89, 165, 0.5), rgba(60, 89, 165, 0.5)), url(../img/campus-facilities/library.jpg);
+}
+
+.img-two {
+    background-image: linear-gradient(rgba(249, 0, 0, 0.5), rgba(249, 0, 0, 0.5)), url(../img/campus-facilities/sports-ground.jpg);
+}
+
+.img-three {
+    background-image: linear-gradient(rgba(251, 188, 5, 0.5), rgba(251, 188, 5, 0.5)), url(../img/campus-facilities/vans.jpg);
+}
+
+.img-four {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(../img/campus-facilities/college-canteen.jpg);
+}
+
+.img-five {
+    background-image: linear-gradient(rgba(212, 0, 0, 0.5), rgba(212, 0, 0, 0.5)), url(../img/campus-facilities/gym.jpg);
+    background-position: right center;
+}
+
+.img-six {
+    background-image: linear-gradient(rgba(60, 89, 165, 0.5), rgba(60, 89, 165, 0.5)), url(../img/campus-facilities/hostel.png);
+}
+
+/* Text Content */
+.img-inner-text {
+    width: 100%;
+    padding: 25px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
+    transition: padding 0.3s ease;
+}
+
+.img-col:hover .img-inner-text {
+    padding: 30px 25px;
+}
+
+.img-inner-text p {
+    font: normal normal 500 34px/51px 'Poppins', sans-serif;
+    letter-spacing: 0.82px;
+    color: #fff;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    transition: transform 0.3s ease;
+}
+
+.img-col:hover .img-inner-text p {
+    transform: translateX(5px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .img-col {
+        height: 250px;
+    }
+    
+    .img-gallery-heading h3 {
+        font-size: 28px;
+        line-height: 40px;
+    }
+    
+    .img-inner-text p {
+        font-size: 26px;
+        line-height: 38px;
+    }
+}
+
+@media (max-width: 576px) {
+    .img-col {
+        height: 200px;
+    }
+    
+    .img-gallery-heading h3 {
+        font-size: 24px;
+        line-height: 36px;
+    }
+    
+    .img-gallery-heading .subtitle {
+        font-size: 14px;
+    }
+    
+    .img-inner-text p {
+        font-size: 22px;
+        line-height: 32px;
+    }
+    
+    .img-inner-text {
+        padding: 15px;
+    }
+}
+/*** img gallery section ends ****/
+/*** img gallery s ection ends ****/
+
+
+
+
 /***** latest placemenst section *****/
-.latest-section {
+/* .latest-section {
     background-image: linear-gradient(to right, #fff 55%, #f5f5f5 45%);
 }
 .latest-section-heading h3{
@@ -608,7 +753,7 @@ img-one-one:hover {
     color: #505050;
 }
 .latest-section-img{
-    /*background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(../img/latest_placements/video-image.jpg);*/
+    background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(../img/latest_placements/video-image.jpg);
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -650,8 +795,284 @@ img-one-one:hover {
     margin: 10px 0px;
     height: auto;
     width: 300px;
+} */
+/* Placement Section */
+/* Placement Section */
+/* Placement Section - Existing styles remain */
+.swrn__placements-main-sec {
+    background: #f8f9fa;
 }
 
+.placement-header h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.placement-subtitle {
+    color: #6c757d;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+}
+
+.placement-header .btn-primary {
+    background: #2563eb;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.placement-header .btn-primary:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+}
+
+.placement-gallery-preview {
+    margin-top: 30px;
+    padding: 40px 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.placement-gallery-preview h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 30px;
+}
+
+.placement-gallery-item {
+    padding: 8px;
+}
+
+.placement-img-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    height: 280px;
+    background: #f0f0f0;
+    transition: all 0.3s ease;
+}
+
+.placement-img-wrapper:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+.placement-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Zoom effect on hover */
+.placement-img-wrapper:hover img {
+    transform: scale(1.15);
+}
+
+/* Internal Carousel Styles */
+.placement-internal-carousel {
+    height: 100%;
+}
+
+.placement-internal-carousel .carousel-inner,
+.placement-internal-carousel .carousel-item {
+    height: 100%;
+}
+
+.placement-internal-carousel .carousel-item img {
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Carousel Controls */
+.placement-internal-carousel .carousel-control-prev,
+.placement-internal-carousel .carousel-control-next {
+    width: 40px;
+    height: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.placement-img-wrapper:hover .carousel-control-prev,
+.placement-img-wrapper:hover .carousel-control-next {
+    opacity: 1;
+}
+
+.placement-internal-carousel .carousel-control-prev {
+    left: 10px;
+}
+
+.placement-internal-carousel .carousel-control-next {
+    right: 10px;
+}
+
+.placement-internal-carousel .carousel-control-prev-icon,
+.placement-internal-carousel .carousel-control-next-icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* Carousel Indicators */
+.placement-internal-carousel .carousel-indicators {
+    bottom: 10px;
+    margin-bottom: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.placement-img-wrapper:hover .carousel-indicators {
+    opacity: 1;
+}
+
+.placement-internal-carousel .carousel-indicators button {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.6);
+    border: none;
+    margin: 0 3px;
+}
+
+.placement-internal-carousel .carousel-indicators button.active {
+    background-color: #fff;
+}
+
+/* Overlay */
+.placement-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 50%, transparent 100%);
+    padding: 20px 15px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 10;
+}
+
+.placement-img-wrapper:hover .placement-overlay {
+    opacity: 1;
+}
+
+.placement-info {
+    color: white;
+    text-align: center;
+}
+
+.placement-info p {
+    margin: 0 0 5px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.placement-info small {
+    font-size: 0.85rem;
+    opacity: 0.95;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    display: block;
+    margin-bottom: 5px;
+}
+
+.image-count-badge {
+    display: inline-block;
+    background: rgba(37, 99, 235, 0.9);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+/* UIKit Slider customization */
+.uk-slider-items {
+    padding-bottom: 10px;
+}
+
+.uk-slidenav {
+    background: rgba(37, 99, 235, 0.9);
+    color: white;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    transition: all 0.3s ease;
+}
+
+.uk-slidenav:hover {
+    background: rgba(37, 99, 235, 1);
+    transform: scale(1.1);
+}
+
+.uk-dotnav > * > * {
+    background: #cbd5e1;
+    border: 2px solid transparent;
+    width: 12px;
+    height: 12px;
+}
+
+.uk-dotnav > .uk-active > * {
+    background: #2563eb;
+    border-color: #2563eb;
+    transform: scale(1.2);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .placement-img-wrapper {
+        height: 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    .placement-header h2 {
+        font-size: 2rem;
+    }
+    
+    .placement-gallery-preview h3 {
+        font-size: 1.5rem;
+    }
+    
+    .placement-img-wrapper {
+        height: 220px;
+    }
+    
+    .placement-gallery-preview {
+        padding: 30px 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .placement-header h2 {
+        font-size: 1.8rem;
+    }
+    
+    .placement-img-wrapper {
+        height: 200px;
+    }
+    
+    .placement-info p {
+        font-size: 0.9rem;
+    }
+    
+    .placement-info small {
+        font-size: 0.75rem;
+    }
+}
 
 /**** events  section starts ****/
 .events-main-heading h2{
@@ -751,6 +1172,17 @@ img-one-one:hover {
     width: 100%;
     height: 150px;
     background-image: linear-gradient(rgba(90,23,23,0),rgba(90,23,23,0)), url(../img/banner_section/common-banner.png);
+    background-size: cover;
+	background-position:center  center;
+    background-repeat: no-repeat;
+    
+}
+
+.image-line-innerpage-research{
+    
+    width: 100%;
+    height: 150px;
+    background-image: linear-gradient(rgba(90,23,23,0),rgba(90,23,23,0)), url(../img/banner_section/research-banner.png);
     background-size: cover;
 	background-position:center  center;
     background-repeat: no-repeat;
@@ -1073,6 +1505,16 @@ ul.contact-address{
     width: 100%;
     height: 150px;
     background-image: linear-gradient(rgba(90,23,23,0),rgba(90,23,23,0)), url(../img/banner_section/common-banner.png);
+    background-size: cover;
+	background-position:center  left;
+    background-repeat: no-repeat;
+    
+}
+.image-line-innerpage-research{
+    
+    width: 100%;
+    height: 150px;
+    background-image: linear-gradient(rgba(90,23,23,0),rgba(90,23,23,0)), url(../img/banner_section/research-banner.png);
     background-size: cover;
 	background-position:center  left;
     background-repeat: no-repeat;
@@ -1494,55 +1936,164 @@ ul.contact-address{
 
 
 /* Section styling to center content */
+/* ============================================
+   PROFESSIONAL BLUE GRADIENT THEME
+   ============================================ */
+
+/* Top Navigation Bar */
 .center-links {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px 0;
-    background-color: #213a7c; /* Set the background color */
+    padding: 12px 0;
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .centered-nav {
     display: flex;
-    gap: 20px; /* Spacing between items */
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
 .centered-nav li {
-    font: normal normal normal 15px/23px 'Poppins', sans-serif;
+    font: normal normal 500 13px/20px 'Poppins', sans-serif;
 }
 
 .centered-nav li a {
-    color: #fff;
+    color: #ffffff;
     text-decoration: none;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
+    /* padding: 8px 16px; 
+    border-radius: 8px;*/
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .centered-nav li a:hover {
-    color: #ffcc00; /* Change to preferred hover color */
+    background: rgba(251, 191, 36, 0.2);
+    border-color: rgba(251, 191, 36, 0.5);
+    color: #fbbf24;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
 }
 
 .centered-nav li a i {
-    margin-right: 5px; /* Space between icon and text */
-}
-/* Show fullscreen section only on desktop */
-@media (min-width: 768px) {
-    .center-links {
-        display: flex;
-    }
+    margin-right: 6px;
+    font-size: 15px;
 }
 
-/* Hide fullscreen menu on mobile */
+/* Main Navigation Bar - Darker for Contrast */
+#large-main-nav.navbar {
+    /* background: #2d4a8e !important; */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+#large-main-nav .nav-link {
+    color: #ffffff !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 10px 15px !important;
+}
+
+#large-main-nav .nav-link:hover {
+    color: #fbbf24 !important;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+}
+
+/* Dropdown menus */
+#large-main-nav .dropdown-menu {
+    background: #ffffff;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+#large-main-nav .dropdown-item {
+    color: #1e3a8a;
+    transition: all 0.2s ease;
+}
+
+#large-main-nav .dropdown-item:hover {
+    background: #e0e7ff;
+    color: #1e3a8a;
+    padding-left: 20px;
+}
+
+/* Logo section background */
+.md-top-nav-secion {
+    background: #ffffff;
+    padding: 15px 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Small logos (NBA, NAAC) */
+.small-logos {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.small-logos img {
+    width: 90px;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.small-logos img:hover {
+    transform: scale(1.1);
+}
+
+/* Placement Section */
+.swrn__placements-main-sec {
+    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+    padding: 60px 0;
+}
+
+/* Placement Cards - Blue theme instead of gold */
+.placement-card-frame {
+    border: 3px solid #2563eb;
+    border-radius: 12px;
+    padding: 5px;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.2);
+    transition: all 0.3s ease;
+}
+
+.placement-card-frame:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.3);
+    border-color: #1d4ed8;
+}
+
+/* Headlines Banner */
+.headlines-banner {
+    background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #1e3a8a 100%);
+    color: #ffffff;
+    padding: 12px 20px;
+    font-weight: 600;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive */
 @media (max-width: 767px) {
     .center-links {
         display: none;
     }
+    
+    .centered-nav li a {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
 }
-
 
 .small-logos {
     display: flex;
@@ -1554,4 +2105,35 @@ ul.contact-address{
 .small-logos img {
     width: 80px;
     height: auto; /* Ensures the aspect ratio of images is maintained */
+}
+
+
+/* courses related */
+/* Intake Badge Styling */
+.intake-badge {
+    display: inline-block;
+    background: #007bff;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+/* New Badge Styling */
+.new-badge {
+    display: inline-block;
+    background: #28a745;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 0.75em;
+    font-weight: 600;
+    margin-left: 5px;
+}
+
+/* Ensure all icons have consistent color filter */
+.featured-img img {
+    filter: brightness(0) saturate(100%) invert(27%) sepia(93%) saturate(2376%) hue-rotate(210deg) brightness(95%) contrast(101%);
 }

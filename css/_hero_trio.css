@@ -1,0 +1,627 @@
+/* ═══════════════════════════════════════════════════════
+   HERO CAROUSEL — Full-width 3-slide carousel
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Tab Nav ── */
+.hero-car-tabnav {
+    display: flex;
+    background: var(--navy-dark);
+    border-bottom: 2px solid rgba(245,166,35,0.25);
+}
+
+.hero-car-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.55);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    padding: 12px 8px;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    letter-spacing: 0.02em;
+}
+.hero-car-tab:hover {
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.04);
+}
+.hero-car-tab.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+    background: rgba(245,166,35,0.07);
+}
+.hero-car-tab i { font-size: 14px; }
+
+/* ── Section wrapper ── */
+.hero-car-section {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: #000;
+}
+
+/* ── Track — 3 slides wide, slides left ── */
+.hero-car-track {
+    display: flex;
+    width: 300%;
+    height: 500px;      /* matches 1600×500px image height exactly */
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+.hero-car-slide {
+    width: 33.3333%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+/* ── Slide 1: Admission Form ── */
+.hero-car-slide-form { background: var(--navy-dark); }
+
+.hero-car-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;          /* hidden — image lives inside quote panel */
+}
+
+.hero-car-overlay {
+    position: absolute;
+    inset: 0;
+    background: transparent;   /* no overlay needed — columns have own bg */
+}
+
+/* ── Full-height split layout ── */
+.hero-car-content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    align-items: stretch;  /* both columns fill full height */
+    gap: 0;
+    padding: 0;
+}
+
+/* Left column — soft form panel */
+.hero-form-col {
+    flex: 0 0 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+    background: linear-gradient(145deg, #eef3fb 0%, #e8eef8 40%, #dfe8f5 100%);
+    padding: 36px 44px 36px 40px;
+    position: relative;
+    border-left: 5px solid var(--gold);
+    border-top: 4px solid var(--navy-dark);
+    box-shadow: none;
+    z-index: 2;
+    overflow: hidden;
+}
+
+/* Soft diagonal watermark lines */
+.hero-form-col::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        repeating-linear-gradient(
+            135deg,
+            rgba(26,46,140,0.04) 0px,
+            rgba(26,46,140,0.04) 1px,
+            transparent 1px,
+            transparent 28px
+        );
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* All direct children above the pattern */
+.hero-form-col > * { position: relative; z-index: 1; }
+
+/* Diagonal white wedge with gold drop-shadow edge */
+.hero-form-col::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -36px;
+    width: 0;
+    height: 0;
+    border-top: 500px solid #fff;
+    border-right: 36px solid transparent;
+    z-index: 4;
+    pointer-events: none;
+    filter: drop-shadow(2px 0 0 var(--gold));
+}
+
+.hero-admit-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--gold);
+    color: var(--navy-dark);
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    padding: 5px 14px 5px 10px;
+    border-radius: 20px;
+    width: fit-content;
+    box-shadow: 0 2px 8px rgba(245,166,35,0.35);
+}
+.hero-admit-badge::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--navy-dark);
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+
+.hero-car-title {
+    color: var(--navy-dark);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.15;
+    margin: 0;
+}
+
+.hero-car-sub {
+    color: rgba(11,25,64,0.55);
+    font-size: 12px;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.hero-enquiry-form {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-top: 4px;
+}
+
+.hero-enquiry-form input,
+.hero-enquiry-form select {
+    background: #fff !important;
+    border: 1px solid #c9d3e8 !important;
+    border-radius: 8px !important;
+    color: #1a1f3c !important;
+    font-size: 13.5px !important;
+    padding: 11px 16px !important;
+    width: 100% !important;
+    outline: none !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+    font-family: 'Inter', sans-serif !important;
+    box-shadow: 0 2px 8px rgba(11,25,64,0.10) !important;
+}
+.hero-enquiry-form input::placeholder  { color: rgba(11,25,64,0.38) !important; }
+.hero-enquiry-form select option       { background: #fff !important; color: #1a1f3c !important; }
+.hero-enquiry-form select optgroup     { background: #f0f4ff !important; color: var(--navy-dark) !important; font-weight: 700 !important; font-style: normal !important; }
+.hero-enquiry-form select optgroup option { background: #fff !important; color: #1a1f3c !important; font-weight: 400 !important; padding-left: 10px !important; }
+.hero-enquiry-form input:focus,
+.hero-enquiry-form select:focus {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 3px rgba(245,166,35,0.18) !important;
+    background: #fffdf7 !important;
+}
+
+.hero-submit-btn {
+    background: linear-gradient(135deg, var(--gold) 0%, #e09112 100%) !important;
+    color: var(--navy-dark) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    padding: 12px 20px !important;
+    cursor: pointer !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 2px !important;
+}
+.hero-submit-btn:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 24px rgba(245,166,35,0.5) !important;
+}
+
+.hero-form-success {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px 0;
+    animation: hfadeUp 0.4s ease;
+}
+.hero-form-success i  { font-size: 2.8rem; color: #22c55e; }
+.hero-form-success p  { font-size: 15px; font-weight: 600; color: var(--navy-dark); margin: 0; }
+
+.hero-admit-contact {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.55);
+    margin-top: 2px;
+}
+.hero-admit-contact i   { color: var(--gold); }
+.hero-admit-contact a   { color: var(--gold) !important; font-weight: 700; text-decoration: none !important; }
+.hero-admit-contact a:hover { text-decoration: underline !important; }
+
+/* ── Quote Panel — right image column, full height ── */
+.hero-quote-panel {
+    flex: 1;
+    position: relative;
+    border-radius: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    border: none;
+    box-shadow: none;
+}
+/* Bottom fade on image for depth */
+.hero-quote-panel::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 80px;
+    background: linear-gradient(0deg, rgba(11,25,64,0.55) 0%, transparent 100%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.hero-quote-img {
+    position: absolute;
+    inset: 0;
+    background-size: 100% 100%;   /* stretch to fill exactly — no top/bottom crop */
+    background-position: center center;
+    background-repeat: no-repeat;
+    transition: opacity 0.35s ease;
+}
+
+/* gradient removed — show image clearly */
+.hero-quote-panel::after { display: none; }
+
+.hero-quote-body {
+    display: none;
+}
+
+.hero-quote-openmark {
+    font-family: Georgia, serif;
+    font-size: 4rem;
+    line-height: 0.6;
+    color: var(--gold);
+    opacity: 0.8;
+    margin-bottom: 6px;
+}
+
+.hero-quote-text {
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.6;
+    margin: 0;
+    font-style: italic;
+    transition: opacity 0.35s ease;
+}
+
+.hero-quote-attr {
+    color: var(--gold);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin: 0;
+    transition: opacity 0.35s ease;
+}
+
+.hero-quote-dots {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.hq-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: 2px solid rgba(245,166,35,0.45);
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.22s, transform 0.22s, border-color 0.22s;
+}
+.hq-dot.active {
+    background: var(--gold);
+    border-color: var(--gold);
+    transform: scale(1.3);
+}
+
+/* ── Slide 2: Video ── */
+.hero-car-slide-video { background: #000; cursor: pointer; }
+
+.hero-car-vid {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.hero-car-vid-overlay {
+    position: absolute;
+    inset: 0;
+    cursor: pointer;
+}
+.hero-car-vid-overlay.hovered { background: transparent; }
+
+.hero-vid-ring {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s, border-color 0.3s, background 0.3s;
+    font-size: 26px;
+    color: #fff;
+    padding-left: 5px;
+}
+.hero-car-vid-overlay.hovered .hero-vid-ring {
+    transform: scale(1.12);
+    border-color: var(--gold);
+    background: rgba(245,166,35,0.2);
+}
+
+.hero-vid-title {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+    text-align: center;
+}
+
+.hero-vid-hint {
+    background: var(--gold);
+    color: var(--navy-dark);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 16px;
+    border-radius: 20px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    letter-spacing: 0.03em;
+}
+.hero-car-vid-overlay.hovered .hero-vid-hint { opacity: 1; }
+
+/* ── Slide 3: Gallery ── */
+.hero-car-slide-gallery { background: #000; }
+
+.hero-gal-track {
+    position: absolute;
+    inset: 0;
+}
+
+.hero-gal-img {
+    position: absolute;
+    inset: 0;
+    background-size: 100% 100%;   /* stretch to fill exactly — no top/bottom crop */
+    background-position: center center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+.hero-gal-img.active { opacity: 1; }
+
+.hero-gal-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(0deg, rgba(11,25,64,0.88) 0%, transparent 100%);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 32px 24px 16px;
+    text-align: center;
+    letter-spacing: 0.03em;
+}
+
+.hero-gal-dots {
+    position: absolute;
+    bottom: 52px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 7px;
+    z-index: 3;
+}
+.hero-gal-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.35);
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.25s, transform 0.25s;
+}
+.hero-gal-dot.active { background: var(--gold); transform: scale(1.4); }
+
+.hero-gal-arr {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.22);
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 4;
+    font-size: 13px;
+    transition: background 0.2s;
+    padding: 0;
+}
+.hero-gal-arr:hover { background: rgba(245,166,35,0.65); }
+.hero-gal-prev { left: 12px; }
+.hero-gal-next { right: 12px; }
+
+/* ── Main carousel arrows ── */
+.hero-car-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.12);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    color: #fff;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    font-size: 15px;
+    transition: background 0.22s, transform 0.22s;
+    padding: 0;
+    backdrop-filter: blur(4px);
+}
+.hero-car-arrow:hover {
+    background: var(--gold);
+    transform: translateY(-50%) scale(1.1);
+    color: var(--navy-dark);
+    border-color: var(--gold);
+}
+.hero-car-arrow-prev { left: 16px; }
+.hero-car-arrow-next { right: 16px; }
+
+/* ── Dot nav ── */
+.hero-car-dots {
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+}
+.hero-car-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.5);
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.25s, border-color 0.25s, transform 0.25s;
+}
+.hero-car-dot.active {
+    background: var(--gold);
+    border-color: var(--gold);
+    transform: scale(1.25);
+}
+
+/* ── Video Modal ── */
+.vf-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.93);
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+.vf-modal.open { display: flex; }
+.vf-inner {
+    position: relative;
+    width: 90vw;
+    max-width: 960px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+}
+.vf-video { width: 100%; display: block; background: #000; max-height: 85vh; }
+.vf-close {
+    position: absolute;
+    top: 12px; right: 12px;
+    z-index: 10;
+    background: rgba(255,255,255,0.95);
+    border: none;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    color: #222;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.2s;
+}
+.vf-close:hover { background: var(--gold); transform: scale(1.1); }
+
+/* ── MOBILE ── */
+@media (max-width: 992px) {
+    .hero-quote-panel   { display: none; }
+    .hero-form-col      { flex: 1; border-right: none; border-left: 4px solid var(--gold); border-top: 3px solid var(--navy-dark); box-shadow: none; padding: 20px 6% 20px calc(6% - 4px); justify-content: flex-start; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; gap: 8px; }
+    .hero-form-col::after { display: none; }
+    .hero-form-col::before { display: none; }
+    .hero-car-title     { font-size: 1.6rem; }
+}
+
+@media (max-width: 768px) {
+    .hero-car-track  { height: 460px; }
+    .hero-car-tab    { font-size: 11px; padding: 10px 6px; gap: 5px; }
+    .hero-car-tab i  { font-size: 12px; }
+    .hero-car-title  { font-size: 1.35rem; }
+    .hero-vid-ring   { width: 60px; height: 60px; font-size: 20px; }
+    .hero-car-arrow  { width: 36px; height: 36px; font-size: 13px; }
+    .hero-car-arrow-prev { left: 8px; }
+    .hero-car-arrow-next { right: 8px; }
+    .vf-inner { width: 96vw; }
+    .hero-enquiry-form { gap: 7px; }
+    .hero-car-sub    { display: none; }
+}
+
+@media (max-width: 480px) {
+    .hero-car-track  { height: 440px; }
+    .hero-form-col   { padding-top: 16px; padding-bottom: 16px; }
+    .hero-car-title  { font-size: 1.2rem; margin-bottom: 2px; }
+    .hero-admit-badge { font-size: 9px; padding: 4px 10px 4px 8px; }
+    .hero-enquiry-form input,
+    .hero-enquiry-form select { font-size: 13px !important; padding: 9px 13px !important; }
+    .hero-submit-btn { font-size: 13px !important; padding: 10px 20px !important; }
+}
+
+@keyframes hfadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+
